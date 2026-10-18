@@ -43,15 +43,31 @@ La web cachea las respuestas del CMS 60 s en memoria. Si el CMS está apagado, l
 - **Transferencia** (`BANK_TRANSFER_*`): solo se muestra si el IBAN es válido.
 - **Contacto** (`POST /api/contact`): guarda el mensaje en el CMS y, si hay SMTP configurado, también lo envía por email.
 
-## Producción
+## Despliegue en Vercel (stage)
+
+Un solo proyecto de Vercel con dos servicios (`vercel.json`) en el mismo dominio:
+
+- `web` (Astro) atiende todo el sitio y sus APIs `/api/contact`, `/api/verse`, `/api/payments/*`.
+- `cms` (Payload) se publica en `/admin` (panel) y `/api/*` (API e imágenes). La web lo llama por la URL interna que inyecta el binding `CMS_URL`.
+
+Pasos:
+
+1. Importa el repo en Vercel (raíz del repo, sin cambiar el *Root Directory*).
+2. **Storage → Neon (Postgres)** y **Storage → Blob**: crean `DATABASE_URL` y `BLOB_READ_WRITE_TOKEN`.
+3. Variables de entorno: `PAYLOAD_SECRET`, `FORM_SECRET`, `YOUTUBE_API_KEY`, `REDSYS_*`, `SMTP_*`, `CONTACT_TO_EMAIL`, `CONTACT_FROM_NAME`. **No** definas `CMS_URL`. Con dominio propio, añade `PUBLIC_SITE_URL` y `PAYLOAD_PUBLIC_SERVER_URL`.
+4. Despliega. El CMS crea las tablas al arrancar (migraciones de `cms/src/migrations-postgres`).
+5. Contenido inicial (una vez): `vercel env pull cms/.env.vercel` y luego `cd cms && set -a && . ./.env.vercel && set +a && NODE_ENV=production pnpm seed`.
+6. Entra en `https://<tu-proyecto>.vercel.app/admin` y crea el usuario administrador.
+
+En local se sigue usando SQLite. Si cambias colecciones o campos, crea migraciones para los dos motores: `pnpm payload migrate:create <nombre>` (SQLite) y lo mismo con `DATABASE_URL=postgres://…` (Postgres).
+
+## Servidor propio (Node)
 
 ```bash
 pnpm build
-cd cms && pnpm start                         # aplica las migraciones al arrancar (prodMigrations)
+cd cms && pnpm start                         # aplica las migraciones al arrancar
 cd web && node --env-file=.env dist/server/entry.mjs
 ```
-
-Si cambias colecciones o campos del CMS, crea una migración antes de desplegar: `cd cms && pnpm payload migrate:create <nombre>`.
 
 ## Pendiente de revisar con la iglesia
 

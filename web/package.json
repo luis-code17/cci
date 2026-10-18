@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@astrojs/node": "^11.1.8",
+    "@astrojs/vercel": "^11.0.15",
     "@fontsource-variable/inter-tight": "^5.2.5",
     "@fontsource/instrument-serif": "^5.2.5",
     "@tailwindcss/vite": "^4.3.3",

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "cms": {
+      "root": "cms",
+      "framework": "nextjs"
+    },
+    "web": {
+      "root": "web",
+      "framework": "astro",
+      "bindings": [
+        { "type": "service", "service": "cms", "format": "url", "env": "CMS_URL" }
+      ]
+    }
+  },
+  "rewrites": [
+    { "source": "/api/contact", "destination": { "service": "web" } },
+    { "source": "/api/verse", "destination": { "service": "web" } },
+    { "source": "/api/payments/(.*)", "destination": { "service": "web" } },
+    { "source": "/api/(.*)", "destination": { "service": "cms" } },
+    { "source": "/admin", "destination": { "service": "cms" } },
+    { "source": "/admin/(.*)", "destination": { "service": "cms" } },
+    { "source": "/_next/(.*)", "destination": { "service": "cms" } },
+    { "source": "/(.*)", "destination": { "service": "web" } }
+  ]
+}

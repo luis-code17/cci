@@ -96,6 +96,10 @@ export type Post = {
 
 type Paginated<T> = { docs: T[]; totalDocs: number }
 
+/**
+ * URL interna del CMS. En Vercel la inyecta el binding de servicio `CMS_URL`
+ * (solo en tiempo de ejecución, por eso se lee en cada llamada y no al importar).
+ */
 function cmsUrl() {
   return (env('CMS_URL') ?? 'http://localhost:3001').replace(/\/$/, '')
 }

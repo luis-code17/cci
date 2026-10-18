@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { env } from '../env'
+import { env, siteUrl as resolveSiteUrl } from '../env'
 
 const schema = z.object({
   REDSYS_MERCHANT_CODE: z.string().min(1),
@@ -26,7 +26,7 @@ export function getPaymentConfig(): PaymentConfig | null {
   const parsed = schema.safeParse(Object.fromEntries(Object.keys(schema.shape).map((key) => [key, env(key)])))
   if (!parsed.success) return null
   const data = parsed.data
-  const siteUrl = data.PUBLIC_SITE_URL ?? 'http://localhost:4321'
+  const siteUrl = data.PUBLIC_SITE_URL ?? resolveSiteUrl()
   return {
     merchantCode: data.REDSYS_MERCHANT_CODE,
     secretKey: data.REDSYS_SECRET_KEY,

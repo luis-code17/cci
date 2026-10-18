@@ -1,5 +1,7 @@
+import { postgresAdapter } from '@payloadcms/db-postgres'
 import { sqliteAdapter } from '@payloadcms/db-sqlite'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 import path from 'path'
 import { buildConfig } from 'payload'
 import { es } from '@payloadcms/translations/languages/es'
@@ -15,18 +17,47 @@ import { Messages } from './collections/Messages'
 import { Settings } from './globals/Settings'
 import { Home } from './globals/Home'
 import { About } from './globals/About'
-import { migrations } from './migrations'
+import { migrations as sqliteMigrations } from './migrations'
+import { migrations as postgresMigrations } from './migrations-postgres'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const serverURL = process.env.PAYLOAD_PUBLIC_SERVER_URL || 'http://localhost:3001'
-const webURL = process.env.WEB_URL || 'http://localhost:4321'
+// En Vercel, CMS y web comparten dominio: el panel y la API de Payload se publican
+// bajo /admin y /api en el mismo host que la web (ver vercel.json).
+function vercelURL() {
+  const host = process.env.VERCEL_ENV === 'production' ? process.env.VERCEL_PROJECT_PRODUCTION_URL : process.env.VERCEL_URL
+  return host ? `https://${host}` : undefined
+}
+
+const serverURL = process.env.PAYLOAD_PUBLIC_SERVER_URL || vercelURL() || 'http://localhost:3001'
+const webURL = process.env.WEB_URL || vercelURL() || 'http://localhost:4321'
+const allowedOrigins = [...new Set([serverURL, webURL])]
+
+/**
+ * Local: archivo SQLite (sin instalar nada). Vercel: Postgres (Neon) cuando DATABASE_URL es postgres://…
+ * En desarrollo el esquema se sincroniza solo; en producción se aplican las migraciones al arrancar.
+ */
+function database() {
+  const url = process.env.DATABASE_URL || 'file:./cci.db'
+  if (/^postgres(ql)?:\/\//.test(url)) {
+    return postgresAdapter({
+      pool: { connectionString: url },
+      migrationDir: path.resolve(dirname, 'migrations-postgres'),
+      prodMigrations: postgresMigrations,
+    })
+  }
+  return sqliteAdapter({
+    client: { url },
+    migrationDir: path.resolve(dirname, 'migrations'),
+    prodMigrations: sqliteMigrations,
+  })
+}
 
 export default buildConfig({
   serverURL,
-  cors: [webURL],
-  csrf: [webURL],
+  cors: allowedOrigins,
+  csrf: allowedOrigins,
   admin: {
     user: Users.slug,
     meta: { titleSuffix: ' · CCI Sabadell' },
@@ -45,13 +76,16 @@ export default buildConfig({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-  db: sqliteAdapter({
-    client: {
-      url: process.env.DATABASE_URL || 'file:./cci.db',
-    },
-    // En desarrollo el esquema se sincroniza solo; en producción se aplican las migraciones al arrancar.
-    prodMigrations: migrations,
-  }),
+  db: database(),
   sharp,
-  plugins: [],
+  plugins: [
+    // Con BLOB_READ_WRITE_TOKEN (Vercel Blob) las imágenes se guardan en Blob en lugar del disco local,
+    // que en Vercel no persiste. Las subidas van directas desde el navegador (límite 4,5 MB de las funciones).
+    vercelBlobStorage({
+      enabled: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
+      collections: { media: true },
+      token: process.env.BLOB_READ_WRITE_TOKEN,
+      clientUploads: true,
+    }),
+  ],
 })
