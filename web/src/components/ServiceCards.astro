@@ -1,0 +1,33 @@
+---
+import type { Service } from '@/lib/cms'
+
+interface Props {
+  services: Service[]
+  tone?: 'light' | 'dark'
+}
+const { services, tone = 'dark' } = Astro.props
+const dark = tone === 'dark'
+---
+
+<div class:list={['grid gap-px overflow-hidden rounded-3xl md:grid-cols-3', dark ? 'bg-line' : 'bg-white/10']}>
+  {
+    services.map((service, index) => (
+      <article class:list={['group relative flex min-h-80 flex-col justify-between p-8 transition-colors duration-500 sm:p-10', dark ? 'bg-paper hover:bg-white' : 'bg-ink hover:bg-ink-2']} data-reveal style={`transition-delay:${index * 80}ms`}>
+        <div class="flex items-start justify-between">
+          <span class:list={['eyebrow', dark ? 'text-stone' : 'text-white/50']}>{String(index + 1).padStart(2, '0')}</span>
+          <span class:list={['h-2 w-2 rounded-full transition-transform duration-500 group-hover:scale-[2.5]', 'flame-bg']} />
+        </div>
+        <div>
+          <h3 class="display text-[clamp(2.6rem,5vw,4rem)]">{service.day}</h3>
+          {service.time ? (
+            <p class:list={['mt-2 font-serif text-4xl italic', dark ? 'text-ink' : 'text-white']}>{service.time}</p>
+          ) : (
+            <a href="/contacto" class:list={['mt-3 inline-block font-serif text-2xl italic underline decoration-flame-2 decoration-1 underline-offset-4', dark ? 'text-ink/70' : 'text-white/70']}>Pregúntanos la hora</a>
+          )}
+          <p class="mt-6 text-lg font-semibold">{service.name}</p>
+          {service.description && <p class:list={['mt-2 text-[15px] leading-6', dark ? 'text-stone' : 'text-white/60']}>{service.description}</p>}
+        </div>
+      </article>
+    ))
+  }
+</div>

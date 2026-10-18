@@ -1,0 +1,119 @@
+---
+import Base from '@/layouts/Base.astro'
+import Icon from '@/components/Icon.astro'
+import PageHero from '@/components/PageHero.astro'
+import SectionHeading from '@/components/SectionHeading.astro'
+import ServiceCards from '@/components/ServiceCards.astro'
+import ContactForm from '@/components/ContactForm.astro'
+import { getSettings } from '@/lib/cms'
+
+const settings = await getSettings()
+const lat = settings.mapLat ?? 41.5376
+const lng = settings.mapLng ?? 2.11564
+const bbox = [lng - 0.006, lat - 0.003, lng + 0.006, lat + 0.003].join(',')
+const mapSrc = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat},${lng}`
+
+const expect = [
+  { title: 'Bienvenida', text: 'Te recibiremos en la puerta. No hace falta conocer a nadie: ven tal como eres.' },
+  { title: 'Adoración', text: 'Cantamos juntos y presentamos nuestras vidas delante de Dios.' },
+  { title: 'Palabra', text: 'Una enseñanza bíblica clara y práctica para tu día a día.' },
+  { title: 'Comunidad', text: 'Al terminar, quédate a conversar. Aquí empieza la familia.' },
+]
+
+const faqs = [
+  { q: '¿Cómo debo vestir?', a: 'Como te sientas cómodo. Lo importante es que vengas.' },
+  { q: '¿Puedo venir con mis hijos?', a: 'Claro que sí. Somos una iglesia de familias y los niños son bienvenidos.' },
+  { q: '¿Tengo que dar dinero?', a: 'No. Si eres nuevo, eres nuestro invitado. Las ofrendas son una expresión voluntaria de quienes forman parte de la iglesia.' },
+  { q: '¿Y si no puedo ir en persona?', a: 'Puedes ver nuestras predicaciones en YouTube y escribirnos para que oremos por ti.' },
+]
+Astro.response.headers.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=600')
+---
+
+<Base title="Visítanos" description={`Planifica tu visita a ${settings.churchName}: horarios, cómo llegar y qué esperar.`}>
+  <PageHero eyebrow="Planifica tu visita" title="Te estamos" accent="esperando" subtitle="Tanto si es tu primera vez en una iglesia como si buscas un nuevo hogar espiritual, queremos que te sientas en casa desde el primer momento." image="/img/conocenos.jpeg">
+    <div class="mt-10 flex flex-wrap gap-3" data-reveal>
+      <a href={settings.mapsUrl} target="_blank" rel="noreferrer" class="btn-light"><Icon name="map-pin" /> Cómo llegar</a>
+      <a href="#avisanos" class="btn-ghost-light">Avísanos que vienes</a>
+    </div>
+  </PageHero>
+
+  <section class="bg-paper py-28 sm:py-36">
+    <div class="shell">
+      <div class="mb-14 flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
+        <SectionHeading eyebrow="Horarios" title="Nuestras" accent="reuniones" />
+        <p class="max-w-sm text-stone" data-reveal>{settings.address} · {settings.city}</p>
+      </div>
+      <ServiceCards services={settings.services} />
+    </div>
+  </section>
+
+  <section class="bg-ink py-28 text-white sm:py-36">
+    <div class="shell">
+      <SectionHeading eyebrow="Tu primera vez" title="Qué" accent="esperar" tone="light" class="mb-16" />
+      <ol class="grid gap-px overflow-hidden rounded-3xl bg-white/10 md:grid-cols-2 lg:grid-cols-4">
+        {
+          expect.map((item, index) => (
+            <li class="bg-ink p-8 sm:p-10" data-reveal style={`transition-delay:${index * 80}ms`}>
+              <span class="font-serif text-5xl italic flame-text">{String(index + 1).padStart(2, '0')}</span>
+              <h3 class="display mt-8 text-3xl">{item.title}</h3>
+              <p class="mt-4 text-[15px] leading-7 text-white/65">{item.text}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <section class="bg-paper py-28 sm:py-36">
+    <div class="shell grid gap-12 lg:grid-cols-12">
+      <div class="lg:col-span-5">
+        <SectionHeading eyebrow="Ubicación" title="Cómo" accent="llegar" />
+        <address class="mt-10 not-italic" data-reveal>
+          <p class="text-2xl font-bold">{settings.address}</p>
+          <p class="text-lg text-stone">{settings.city}</p>
+        </address>
+        <a href={settings.mapsUrl} target="_blank" rel="noreferrer" class="btn-dark mt-8" data-reveal>Abrir en Google Maps <Icon name="arrow-up-right" /></a>
+      </div>
+      <div class="overflow-hidden rounded-[2rem] border border-line lg:col-span-7" data-reveal>
+        <iframe
+          title={`Mapa: ${settings.address}`}
+          src={mapSrc}
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          class="h-[26rem] w-full grayscale lg:h-full lg:min-h-[30rem]"></iframe>
+      </div>
+    </div>
+  </section>
+
+  <section class="border-t border-line bg-paper py-28 sm:py-36">
+    <div class="shell grid gap-12 lg:grid-cols-12">
+      <div class="lg:col-span-5">
+        <SectionHeading eyebrow="Preguntas" title="Frecuentes" />
+      </div>
+      <div class="divide-y divide-line border-y border-line lg:col-span-7">
+        {
+          faqs.map((faq) => (
+            <details class="group py-6" data-reveal>
+              <summary class="flex cursor-pointer list-none items-center justify-between gap-6 text-xl font-semibold [&::-webkit-details-marker]:hidden">
+                {faq.q}
+                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-line text-xl transition group-open:rotate-45">+</span>
+              </summary>
+              <p class="mt-4 max-w-xl text-[15px] leading-7 text-stone">{faq.a}</p>
+            </details>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section id="avisanos" class="scroll-mt-20 bg-paper-2 py-28 sm:py-36">
+    <div class="shell grid gap-12 lg:grid-cols-12">
+      <div class="lg:col-span-5">
+        <SectionHeading eyebrow="Avísanos" title="¿Vienes" accent="pronto?" intro="Déjanos tus datos y alguien del equipo te escribirá para recibirte personalmente." />
+      </div>
+      <div class="lg:col-span-7" data-reveal>
+        <ContactForm kind="visita" subject="Mi primera visita" fixedKind />
+      </div>
+    </div>
+  </section>
+</Base>

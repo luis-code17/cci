@@ -1,0 +1,9 @@
+packages:
+  - cms
+  - web
+onlyBuiltDependencies:
+  - sharp
+  - esbuild
+  - unrs-resolver
+  - better-sqlite3
+  - '@libsql/client'

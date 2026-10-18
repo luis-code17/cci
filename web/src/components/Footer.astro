@@ -1,0 +1,113 @@
+---
+import Icon from './Icon.astro'
+import Logo from './Logo.astro'
+import type { Settings } from '@/lib/cms'
+
+interface Props {
+  settings: Settings
+}
+const { settings } = Astro.props
+
+const columns = [
+  {
+    title: 'Iglesia',
+    links: [
+      { href: '/iglesia', label: 'Quiénes somos' },
+      { href: '/iglesia#creemos', label: 'Lo que creemos' },
+      { href: '/iglesia#ministerios', label: 'Ministerios' },
+      { href: '/eventos', label: 'Eventos' },
+    ],
+  },
+  {
+    title: 'Recursos',
+    links: [
+      { href: '/predicaciones', label: 'Predicaciones' },
+      { href: '/blog', label: 'Blog' },
+      { href: '/ofrendas', label: 'Ofrendas y diezmos' },
+      { href: '/contacto?tipo=oracion', label: 'Petición de oración' },
+    ],
+  },
+]
+const socials = [
+  { href: settings.instagram, label: 'Instagram', icon: 'instagram' },
+  { href: settings.facebook, label: 'Facebook', icon: 'facebook' },
+  { href: settings.youtube, label: 'YouTube', icon: 'youtube' },
+] as const
+---
+
+<footer class="relative overflow-hidden bg-ink text-white">
+  <div class="shell grid gap-14 py-20 lg:grid-cols-12 lg:py-24">
+    <div class="lg:col-span-3">
+      <Logo variant="full" class="w-48" />
+      <p class="mt-6 max-w-sm text-[15px] leading-7 text-white/60">{settings.description}</p>
+      <div class="mt-8 flex gap-3">
+        {
+          socials.filter((item) => item.href).map((item) => (
+            <a href={item.href!} target="_blank" rel="noreferrer" aria-label={item.label} class="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 text-white/80 transition hover:border-white hover:text-white">
+              <Icon name={item.icon} class="h-[18px] w-[18px]" />
+            </a>
+          ))
+        }
+      </div>
+    </div>
+
+    <div class="lg:col-span-3">
+      <p class="eyebrow text-white/40">Reuniones</p>
+      <ul class="mt-5 space-y-4">
+        {
+          settings.services.map((service) => (
+            <li class="flex items-baseline justify-between gap-4 border-b border-white/10 pb-4">
+              <span>
+                <span class="block font-semibold">{service.day}</span>
+                <span class="text-sm text-white/55">{service.name}</span>
+              </span>
+              {service.time && <span class="font-serif text-2xl italic text-white/90">{service.time}</span>}
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <div class="grid grid-cols-2 gap-8 lg:col-span-3">
+      {
+        columns.map((column) => (
+          <div>
+            <p class="eyebrow text-white/40">{column.title}</p>
+            <ul class="mt-5 space-y-3 text-[15px]">
+              {column.links.map((link) => (
+                <li>
+                  <a href={link.href} class="text-white/75 transition hover:text-white">
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+
+    <div class="lg:col-span-3">
+      <p class="eyebrow text-white/40">Encuéntranos</p>
+      <a href={settings.mapsUrl} target="_blank" rel="noreferrer" class="mt-5 flex gap-3 text-[15px] leading-6 text-white/75 hover:text-white">
+        <Icon name="map-pin" class="mt-1 h-4 w-4 shrink-0" />
+        <span>{settings.address}<br />{settings.city}</span>
+      </a>
+      <a href={`mailto:${settings.email}`} class="mt-4 flex items-center gap-3 text-[15px] text-white/75 hover:text-white">
+        <Icon name="mail" class="h-4 w-4 shrink-0" />
+        <span class="break-all">{settings.email}</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="shell" aria-hidden="true">
+    <p class="display select-none whitespace-nowrap text-[clamp(3rem,13.5vw,13rem)] text-white/[0.06]">Somos uno</p>
+  </div>
+
+  <div class="border-t border-white/10">
+    <div class="shell flex flex-col gap-2 py-6 text-xs text-white/45 sm:flex-row sm:items-center sm:justify-between">
+      <p>© {new Date().getFullYear()} {settings.churchName} · {settings.fullName}</p>
+      <p class="font-serif text-sm italic text-white/60">{settings.tagline}</p>
+    </div>
+  </div>
+</footer>

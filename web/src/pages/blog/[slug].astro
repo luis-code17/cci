@@ -1,0 +1,35 @@
+---
+import Base from '@/layouts/Base.astro'
+import Icon from '@/components/Icon.astro'
+import { getPost, mediaSrc } from '@/lib/cms'
+import { formatDate } from '@/lib/format'
+
+const post = await getPost(Astro.params.slug ?? '')
+if (!post) return Astro.rewrite('/404')
+const cover = mediaSrc(post.cover, 'hero')
+---
+
+<Base title={post.title} description={post.excerpt ?? undefined} image={mediaSrc(post.cover, 'card')}>
+  <article>
+    <header class="bg-ink pb-16 pt-40 text-white sm:pb-24">
+      <div class="shell max-w-5xl">
+        <a href="/blog" class="link-arrow text-white/60 hover:text-white"><Icon name="arrow-left" /> Blog</a>
+        <p class="eyebrow mt-10 text-white/50">{formatDate(post.publishedAt)}{post.author ? ` · ${post.author}` : ''}</p>
+        <h1 class="mt-5 text-[clamp(2.4rem,6vw,5rem)] font-bold leading-[1] tracking-[-0.035em]">{post.title}</h1>
+        {post.excerpt && <p class="mt-8 max-w-3xl font-serif text-2xl italic leading-snug text-white/80 sm:text-3xl">{post.excerpt}</p>}
+      </div>
+    </header>
+    {
+      cover && (
+        <div class="bg-[linear-gradient(to_bottom,var(--color-ink)_50%,var(--color-paper)_50%)]">
+          <div class="shell max-w-6xl">
+            <img src={cover} alt={post.cover?.alt ?? ''} class="aspect-[16/9] w-full rounded-[2rem] object-cover" />
+          </div>
+        </div>
+      )
+    }
+    <div class="bg-paper py-16 sm:py-24">
+      <div class="shell max-w-3xl prose-cci" set:html={post.contentHtml ?? ''} />
+    </div>
+  </article>
+</Base>

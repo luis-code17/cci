@@ -1,0 +1,70 @@
+---
+import Icon from './Icon.astro'
+import type { Verse } from '@/lib/verse'
+
+interface Props {
+  verse: Verse
+}
+const { verse } = Astro.props
+---
+
+<section class="relative isolate overflow-hidden bg-ink py-28 text-white sm:py-36" aria-labelledby="verse-title">
+  <img src="/img/versiculo_del_dia.jpeg" alt="" loading="lazy" class="absolute inset-0 -z-20 h-full w-full object-cover opacity-35 grayscale" />
+  <div class="absolute inset-0 -z-10 bg-gradient-to-b from-ink via-ink/70 to-ink" />
+  <div class="shell text-center" data-verse>
+    <p id="verse-title" class="eyebrow text-white/60" data-reveal>
+      <span data-verse-label>Versículo del día</span>
+    </p>
+    <blockquote class="mx-auto mt-10 max-w-5xl" data-reveal>
+      <p data-verse-text class="font-serif text-[clamp(1.9rem,4.6vw,4rem)] leading-[1.12] transition-opacity duration-500">“{verse.verse}”</p>
+      <footer class="mt-10">
+        <cite data-verse-reference class="eyebrow not-italic flame-text text-sm">{verse.reference}</cite>
+      </footer>
+    </blockquote>
+    <div class="mt-12 flex flex-wrap justify-center gap-3" data-reveal>
+      <button type="button" data-verse-random class="btn-ghost-light">
+        <Icon name="shuffle" /> Otro versículo
+      </button>
+      <button type="button" data-verse-share class="btn-ghost-light">Compartir</button>
+    </div>
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-verse]').forEach((root) => {
+    const text = root.querySelector<HTMLElement>('[data-verse-text]')!
+    const reference = root.querySelector<HTMLElement>('[data-verse-reference]')!
+    const label = root.querySelector<HTMLElement>('[data-verse-label]')!
+    const randomButton = root.querySelector<HTMLButtonElement>('[data-verse-random]')!
+    const shareButton = root.querySelector<HTMLButtonElement>('[data-verse-share]')!
+
+    randomButton.addEventListener('click', async () => {
+      randomButton.disabled = true
+      text.style.opacity = '0.25'
+      try {
+        const response = await fetch('/api/verse?random=1')
+        if (!response.ok) throw new Error()
+        const verse = (await response.json()) as { verse: string; reference: string }
+        text.textContent = `“${verse.verse}”`
+        reference.textContent = verse.reference
+        label.textContent = 'Versículo aleatorio'
+      } catch {
+        label.textContent = 'No se pudo cargar otro versículo'
+      } finally {
+        text.style.opacity = ''
+        randomButton.disabled = false
+      }
+    })
+
+    shareButton.addEventListener('click', async () => {
+      const message = `${text.textContent} — ${reference.textContent}`
+      if (navigator.share) {
+        await navigator.share({ text: message, url: location.origin }).catch(() => {})
+      } else {
+        await navigator.clipboard.writeText(message)
+        shareButton.textContent = '¡Copiado!'
+        setTimeout(() => (shareButton.textContent = 'Compartir'), 2000)
+      }
+    })
+  })
+</script>

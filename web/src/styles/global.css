@@ -1,0 +1,197 @@
+@import "tailwindcss";
+@import "@fontsource-variable/inter-tight";
+@import "@fontsource/instrument-serif/400.css";
+@import "@fontsource/instrument-serif/400-italic.css";
+
+@theme {
+  --font-sans: "Inter Tight Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Instrument Serif", ui-serif, Georgia, serif;
+
+  --color-ink: #0a0a0a;
+  --color-ink-2: #161514;
+  --color-paper: #f5f2ec;
+  --color-paper-2: #ebe6dd;
+  --color-stone: #6f6a62;
+  --color-line: #d9d3c7;
+  --color-flame-1: #fbb83a;
+  --color-flame-2: #f07a22;
+  --color-flame-3: #d9381e;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-paper font-sans text-ink;
+  }
+
+  ::selection {
+    background: var(--color-flame-2);
+    color: white;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-flame-2);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@utility shell {
+  @apply mx-auto w-full max-w-[1440px] px-5 sm:px-8 lg:px-12;
+}
+
+/* Titulares tipo cartel: mayúsculas, peso alto, interletrado negativo. */
+@utility display {
+  @apply font-sans font-extrabold uppercase leading-[0.9] tracking-[-0.045em];
+}
+
+@utility eyebrow {
+  @apply text-[11px] font-semibold uppercase tracking-[0.28em];
+}
+
+@utility serif-accent {
+  @apply font-serif font-normal normal-case italic tracking-normal;
+}
+
+@utility flame-text {
+  background: linear-gradient(100deg, var(--color-flame-1), var(--color-flame-2) 45%, var(--color-flame-3));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility flame-bg {
+  background: linear-gradient(120deg, var(--color-flame-1), var(--color-flame-2) 50%, var(--color-flame-3));
+}
+
+@utility btn {
+  @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-6 text-[13px] font-semibold uppercase tracking-[0.14em] transition duration-300;
+}
+
+@utility field {
+  @apply w-full rounded-2xl border border-line bg-white px-4 py-3.5 text-base text-ink outline-none transition placeholder:text-stone/70 focus:border-ink;
+}
+
+@layer components {
+
+  .btn-light {
+    @apply btn bg-white text-ink hover:bg-paper-2;
+  }
+  .btn-dark {
+    @apply btn bg-ink text-white hover:bg-ink-2;
+  }
+  .btn-ghost-light {
+    @apply btn border border-white/40 text-white hover:border-white hover:bg-white/10;
+  }
+  .btn-ghost-dark {
+    @apply btn border border-ink/25 text-ink hover:border-ink hover:bg-ink/5;
+  }
+  .btn-flame {
+    @apply btn flame-bg text-white shadow-[0_10px_30px_-10px_rgba(240,122,34,0.7)] hover:brightness-110;
+  }
+
+  .link-arrow {
+    @apply inline-flex items-center gap-2 text-[13px] font-semibold uppercase tracking-[0.14em];
+  }
+  .link-arrow svg {
+    @apply transition-transform duration-300;
+  }
+  .link-arrow:hover svg {
+    transform: translateX(4px);
+  }
+
+  .card-img {
+    @apply overflow-hidden bg-ink-2;
+  }
+  .card-img img {
+    @apply h-full w-full object-cover transition duration-700 ease-out-expo;
+  }
+  .group:hover .card-img img {
+    transform: scale(1.04);
+  }
+
+  /* Contenido enriquecido desde Payload */
+  .prose-cci {
+    @apply text-lg leading-8 text-ink/85;
+  }
+  .prose-cci > * + * {
+    @apply mt-6;
+  }
+  .prose-cci h2 {
+    @apply mt-12 text-3xl font-bold tracking-tight text-ink;
+  }
+  .prose-cci h3 {
+    @apply mt-10 text-2xl font-bold tracking-tight text-ink;
+  }
+  .prose-cci a {
+    @apply underline decoration-flame-2 underline-offset-4;
+  }
+  .prose-cci blockquote {
+    @apply border-l-2 border-flame-2 pl-6 font-serif text-2xl italic text-ink;
+  }
+  .prose-cci ul {
+    @apply list-disc pl-6;
+  }
+  .prose-cci ol {
+    @apply list-decimal pl-6;
+  }
+  .prose-cci img {
+    @apply rounded-2xl;
+  }
+}
+
+/* Aparición al hacer scroll (ver Base.astro) */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.9s var(--ease-out-expo),
+    transform 0.9s var(--ease-out-expo);
+}
+[data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}
+.no-js [data-reveal] {
+  opacity: 1;
+  transform: none;
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.marquee-track {
+  animation: marquee 40s linear infinite;
+}
+
+@keyframes hero-zoom {
+  from {
+    transform: scale(1.12);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+.hero-zoom {
+  animation: hero-zoom 2.4s var(--ease-out-expo) both;
+}

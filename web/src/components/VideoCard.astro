@@ -1,0 +1,33 @@
+---
+import Icon from './Icon.astro'
+import type { YouTubeVideo } from '@/lib/youtube'
+import { formatDate } from '@/lib/format'
+
+interface Props {
+  video: YouTubeVideo
+  size?: 'lg' | 'md'
+  tone?: 'light' | 'dark'
+}
+const { video, size = 'md', tone = 'light' } = Astro.props
+---
+
+<button
+  type="button"
+  data-play-video={video.id}
+  data-video-title={video.title}
+  class="group block w-full text-left"
+  aria-label={`Reproducir: ${video.title}`}
+>
+  <div class="card-img relative aspect-video rounded-2xl">
+    <img src={video.thumbnail} alt="" loading="lazy" />
+    <div class="absolute inset-0 bg-gradient-to-t from-ink/70 via-transparent to-transparent" />
+    <span class:list={['absolute flex items-center justify-center rounded-full bg-white text-ink transition duration-500 group-hover:scale-110', size === 'lg' ? 'bottom-6 left-6 h-16 w-16' : 'bottom-4 left-4 h-12 w-12']}>
+      <Icon name="play" class={size === 'lg' ? 'ml-1 h-6 w-6' : 'ml-0.5 h-4 w-4'} />
+    </span>
+    {video.durationLabel && <span class="absolute bottom-4 right-4 rounded-full bg-ink/70 px-2.5 py-1 text-xs font-medium text-white backdrop-blur">{video.durationLabel}</span>}
+  </div>
+  <p class:list={['eyebrow mt-5', tone === 'light' ? 'text-white/50' : 'text-stone']}>{formatDate(video.publishedAt)}</p>
+  <h3 class:list={['mt-2 font-bold leading-tight tracking-tight', size === 'lg' ? 'text-2xl sm:text-4xl' : 'text-xl', tone === 'light' ? 'text-white' : 'text-ink']}>
+    {video.title}
+  </h3>
+</button>

@@ -1,0 +1,36 @@
+---
+import Base from '@/layouts/Base.astro'
+import Icon from '@/components/Icon.astro'
+import PageHero from '@/components/PageHero.astro'
+import { getEvent, mediaSrc } from '@/lib/cms'
+import { formatDate, formatTime } from '@/lib/format'
+
+const event = await getEvent(Astro.params.slug ?? '')
+if (!event) return Astro.rewrite('/404')
+
+const when = `${formatDate(event.startsAt)} · ${formatTime(event.startsAt)}${event.endsAt ? ` – ${formatTime(event.endsAt)}` : ''}`
+const toCalendarDate = (value: string) => new Date(value).toISOString().replace(/[-:]|\.\d{3}/g, '')
+const end = event.endsAt ?? new Date(new Date(event.startsAt).getTime() + 2 * 3600_000).toISOString()
+const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${toCalendarDate(event.startsAt)}/${toCalendarDate(end)}&location=${encodeURIComponent(event.location ?? '')}&details=${encodeURIComponent(event.summary ?? '')}`
+---
+
+<Base title={event.title} description={event.summary ?? undefined} image={mediaSrc(event.image, 'card')}>
+  <PageHero eyebrow={when} title={event.title} subtitle={event.summary ?? undefined} image={mediaSrc(event.image, 'hero')} imageAlt={event.image?.alt} />
+
+  <section class="bg-paper py-20 sm:py-28">
+    <div class="shell grid gap-12 lg:grid-cols-12">
+      <aside class="space-y-6 lg:col-span-4">
+        <div class="rounded-3xl bg-white p-8">
+          <p class="flex items-center gap-3 font-semibold"><Icon name="calendar" class="h-5 w-5" /> {when}</p>
+          {event.location && <p class="mt-4 flex items-start gap-3 text-stone"><Icon name="map-pin" class="mt-1 h-5 w-5 shrink-0" /> {event.location}</p>}
+          <div class="mt-8 grid gap-3">
+            {event.registrationUrl && <a href={event.registrationUrl} target="_blank" rel="noreferrer" class="btn-flame">Inscribirme <Icon name="arrow-up-right" /></a>}
+            <a href={calendarUrl} target="_blank" rel="noreferrer" class="btn-ghost-dark">Añadir al calendario</a>
+          </div>
+        </div>
+        <a href="/eventos" class="link-arrow"><Icon name="arrow-left" /> Todos los eventos</a>
+      </aside>
+      <article class="prose-cci lg:col-span-8" set:html={event.descriptionHtml ?? `<p>${event.summary ?? ''}</p>`} />
+    </div>
+  </section>
+</Base>

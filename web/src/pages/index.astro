@@ -1,0 +1,267 @@
+---
+import Base from '@/layouts/Base.astro'
+import Icon from '@/components/Icon.astro'
+import SectionHeading from '@/components/SectionHeading.astro'
+import ServiceCards from '@/components/ServiceCards.astro'
+import VerseOfDay from '@/components/VerseOfDay.astro'
+import VideoCard from '@/components/VideoCard.astro'
+import VideoModal from '@/components/VideoModal.astro'
+import EventCard from '@/components/EventCard.astro'
+import { getHome, getMinistries, getSettings, getUpcomingEvents, mediaSrc } from '@/lib/cms'
+import { getVerseOfTheDay } from '@/lib/verse'
+import { getLatestVideos, YOUTUBE_CHANNEL_HANDLE_URL } from '@/lib/youtube'
+
+const [home, settings, ministries, events, verse, latest] = await Promise.all([
+  getHome(),
+  getSettings(),
+  getMinistries(),
+  getUpcomingEvents(3),
+  getVerseOfTheDay(),
+  getLatestVideos(12),
+])
+
+// Portada: priorizamos predicaciones largas sobre Shorts.
+const sermons = latest.filter((video) => !video.isShort).slice(0, 3)
+const [featured, ...moreSermons] = sermons
+const stepIcons = ['door', 'hand', 'users', 'heart'] as const
+const marquee = ['Tu casa', 'Somos uno', 'Nuevos comienzos', 'Sabadell', 'Jesucristo en el centro']
+
+Astro.response.headers.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=600')
+---
+
+<Base description={home.hero.subtitle}>
+  <!-- HERO -->
+  <section class="relative isolate flex min-h-[100svh] items-end overflow-hidden bg-ink text-white">
+    <img
+      src={mediaSrc(home.hero.image, 'hero') ?? '/img/adoracion.jpeg'}
+      alt={home.hero.image?.alt ?? ''}
+      class="hero-zoom absolute inset-0 -z-20 h-full w-full object-cover object-center"
+      fetchpriority="high"
+    />
+    <div class="absolute inset-0 -z-10 bg-[linear-gradient(to_top,var(--color-ink)_0%,rgba(10,10,10,.75)_35%,rgba(10,10,10,.25)_75%,rgba(10,10,10,.55)_100%)]"></div>
+
+    <div class="shell pb-10 pt-44 sm:pb-14">
+      {home.hero.eyebrow && <p class="eyebrow text-white/70" data-reveal>{home.hero.eyebrow}</p>}
+      <h1 class="display mt-6 text-[clamp(3.6rem,14vw,13.5rem)]" data-reveal>
+        {home.hero.title}
+      </h1>
+      <div class="mt-10 grid gap-10 border-t border-white/15 pt-8 lg:grid-cols-12 lg:items-end">
+        <p class="max-w-xl text-lg leading-8 text-white/80 sm:text-xl lg:col-span-6" data-reveal>{home.hero.subtitle}</p>
+        <div class="flex flex-wrap gap-3 lg:col-span-6 lg:justify-end" data-reveal>
+          {home.hero.primary?.href && <a href={home.hero.primary.href} class="btn-light">{home.hero.primary.label} <Icon name="arrow-right" /></a>}
+          {home.hero.secondary?.href && <a href={home.hero.secondary.href} class="btn-ghost-light"><Icon name="play" class="h-3.5 w-3.5" /> {home.hero.secondary.label}</a>}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CINTA -->
+  <div class="overflow-hidden border-y border-ink bg-paper py-5" aria-hidden="true">
+    <div class="marquee-track flex w-max gap-10 whitespace-nowrap">
+      {
+        [...marquee, ...marquee, ...marquee, ...marquee].map((word) => (
+          <span class="display flex items-center gap-10 text-4xl sm:text-5xl">
+            {word}
+            <img src="/flame.png" alt="" class="h-8 w-auto" />
+          </span>
+        ))
+      }
+    </div>
+  </div>
+
+  <!-- DECLARACIÓN -->
+  <section class="bg-paper py-28 sm:py-36">
+    <div class="shell grid gap-12 lg:grid-cols-12">
+      <p class="eyebrow text-stone lg:col-span-3" data-reveal>Somos {settings.churchName}</p>
+      <div class="lg:col-span-9">
+        <p class="text-[clamp(1.9rem,4.2vw,3.75rem)] font-medium leading-[1.08] tracking-[-0.03em]" data-reveal>
+          {home.statement}
+        </p>
+        <a href="/iglesia" class="link-arrow mt-12" data-reveal>Conoce nuestra historia <Icon name="arrow-right" /></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- NUESTRA CULTURA -->
+  <section class="bg-paper pb-28 sm:pb-36">
+    <div class="shell grid items-center gap-12 lg:grid-cols-12 lg:gap-16">
+      <div class="card-img aspect-[4/3] rounded-[2rem] lg:col-span-7" data-reveal>
+        <img src={mediaSrc(home.culture.image, 'hero') ?? '/img/conocenos.jpeg'} alt={home.culture.image?.alt ?? 'Comunidad de CCI Sabadell'} loading="lazy" />
+      </div>
+      <div class="lg:col-span-5">
+        <p class="eyebrow text-stone" data-reveal>Nuestra cultura</p>
+        <h2 class="display mt-5 text-[clamp(2.6rem,5.5vw,4.75rem)]" data-reveal>{home.culture.title}</h2>
+        <p class="mt-6 text-lg leading-8 text-ink/75" data-reveal>{home.culture.body}</p>
+        <div class="mt-10 flex flex-wrap gap-3" data-reveal>
+          <a href="/iglesia" class="btn-dark">Más sobre CCI <Icon name="arrow-right" /></a>
+          <a href="/visitanos" class="btn-ghost-dark">Planifica tu visita</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REUNIONES -->
+  <section class="bg-paper pb-28 sm:pb-36" id="reuniones">
+    <div class="shell">
+      <div class="mb-14 flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
+        <SectionHeading eyebrow="Nuestras reuniones" title="Te esperamos" accent="cada semana" />
+        <a href={settings.mapsUrl} target="_blank" rel="noreferrer" class="link-arrow shrink-0" data-reveal>
+          <Icon name="map-pin" /> {settings.address}, Sabadell
+        </a>
+      </div>
+      <ServiceCards services={settings.services} />
+    </div>
+  </section>
+
+  <!-- VERSÍCULO -->
+  <VerseOfDay verse={verse} />
+
+  <!-- PREDICACIONES -->
+  <section class="bg-ink py-28 text-white sm:py-36">
+    <div class="shell">
+      <div class="mb-14 flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
+        <SectionHeading eyebrow="Predicaciones" title="Mensajes" accent="para tu semana" tone="light" />
+        <a href="/predicaciones" class="btn-ghost-light shrink-0" data-reveal>Ver todas <Icon name="arrow-right" /></a>
+      </div>
+
+      {
+        featured ? (
+          <div class="grid gap-10 lg:grid-cols-12">
+            <div class="lg:col-span-8" data-reveal>
+              <VideoCard video={featured} size="lg" />
+            </div>
+            <div class="grid content-start gap-10 lg:col-span-4">
+              {moreSermons.map((video) => (
+                <div data-reveal>
+                  <VideoCard video={video} />
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <a href={YOUTUBE_CHANNEL_HANDLE_URL} target="_blank" rel="noreferrer" class="group relative block overflow-hidden rounded-[2rem]" data-reveal>
+            <div class="card-img aspect-[21/9]">
+              <img src="/img/predicaciones_dark.jpeg" alt="" loading="lazy" class="opacity-60" />
+            </div>
+            <div class="absolute inset-0 flex flex-col items-start justify-end p-8 sm:p-12">
+              <span class="flex h-16 w-16 items-center justify-center rounded-full bg-white text-ink"><Icon name="play" class="ml-1 h-6 w-6" /></span>
+              <p class="display mt-6 text-4xl sm:text-6xl">Míranos en YouTube</p>
+            </div>
+          </a>
+        )
+      }
+    </div>
+  </section>
+
+  <!-- PARA TI -->
+  <section class="bg-paper py-28 sm:py-36">
+    <div class="shell">
+      <SectionHeading eyebrow="Próximos pasos" title="Para ti" intro="Estés donde estés en tu camino de fe, hay un siguiente paso para ti." class="mb-14" />
+      <div class="grid gap-5 md:grid-cols-3">
+        {
+          home.nextSteps.map((step, index) => (
+            <a
+              href={step.href ?? '#'}
+              class="group relative flex min-h-80 flex-col justify-between overflow-hidden rounded-3xl border border-line bg-white p-8 transition duration-500 hover:-translate-y-1 hover:border-transparent hover:text-white sm:p-10"
+              data-reveal
+              style={`transition-delay:${index * 80}ms`}
+            >
+              <span class="flame-bg absolute inset-0 -z-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+              <span class="relative flex h-14 w-14 items-center justify-center rounded-full bg-ink text-white transition group-hover:bg-white group-hover:text-ink">
+                <Icon name={stepIcons[index % stepIcons.length]} class="h-6 w-6" />
+              </span>
+              <span class="relative">
+                <span class="display block text-4xl sm:text-5xl">{step.title}</span>
+                {step.description && <span class="mt-4 block text-[15px] leading-6 text-stone transition group-hover:text-white/85">{step.description}</span>}
+                {step.label && <span class="link-arrow mt-8">{step.label} <Icon name="arrow-right" /></span>}
+              </span>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- MINISTERIOS -->
+  <section class="bg-paper pb-28 sm:pb-36">
+    <div class="shell">
+      <div class="mb-14 flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
+        <SectionHeading eyebrow="Para tu familia" title="Ministerios" />
+        <a href="/iglesia#ministerios" class="link-arrow shrink-0" data-reveal>Todos los ministerios <Icon name="arrow-right" /></a>
+      </div>
+      <div class="grid gap-5 md:grid-cols-3">
+        {
+          ministries.slice(0, 3).map((ministry, index) => (
+            <article class="group relative overflow-hidden rounded-3xl text-white" data-reveal style={`transition-delay:${index * 80}ms`}>
+              <div class="card-img aspect-[4/5]">
+                <img src={mediaSrc(ministry.image, 'card') ?? '/img/conocenos.jpeg'} alt="" loading="lazy" class="grayscale-[35%]" />
+              </div>
+              <div class="absolute inset-0 bg-gradient-to-t from-ink via-ink/30 to-transparent" />
+              <div class="absolute inset-x-0 bottom-0 p-7 sm:p-8">
+                {ministry.audience && <p class="eyebrow text-white/70">{ministry.audience}</p>}
+                <h3 class="display mt-3 text-4xl sm:text-5xl">{ministry.name}</h3>
+                {ministry.tagline && <p class="mt-2 font-serif text-2xl italic text-white/90">{ministry.tagline}</p>}
+                {ministry.meetingTime && (
+                  <p class="mt-5 inline-flex items-center gap-2 rounded-full border border-white/25 px-3 py-1.5 text-xs font-medium">
+                    <Icon name="clock" class="h-3.5 w-3.5" /> {ministry.meetingTime}
+                  </p>
+                )}
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- EVENTOS -->
+  {
+    events.length > 0 && (
+      <section class="border-t border-line bg-paper py-28 sm:py-36">
+        <div class="shell">
+          <div class="mb-14 flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
+            <SectionHeading eyebrow="Agenda" title="Próximos eventos" />
+            <a href="/eventos" class="link-arrow shrink-0" data-reveal>Todos los eventos <Icon name="arrow-right" /></a>
+          </div>
+          <div class="grid gap-8 md:grid-cols-3">
+            {events.map((event) => <EventCard event={event} />)}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <!-- ONLINE -->
+  <section class="relative isolate overflow-hidden bg-ink py-28 text-white sm:py-36">
+    <div class="flame-bg absolute -bottom-64 -left-40 -z-10 h-[34rem] w-[34rem] rounded-full opacity-30 blur-[130px]"></div>
+    <div class="shell grid items-center gap-12 lg:grid-cols-12">
+      <div class="lg:col-span-7">
+        <p class="eyebrow text-white/50" data-reveal>CCI Online</p>
+        <h2 class="display mt-5 text-[clamp(2.6rem,6vw,5.5rem)]" data-reveal>{home.online.title}</h2>
+      </div>
+      <div class="lg:col-span-5">
+        <p class="text-lg leading-8 text-white/70" data-reveal>{home.online.body}</p>
+        <div class="mt-10 flex flex-wrap gap-3" data-reveal>
+          <a href={settings.youtube ?? YOUTUBE_CHANNEL_HANDLE_URL} target="_blank" rel="noreferrer" class="btn-flame"><Icon name="youtube" /> Canal de YouTube</a>
+          <a href="/predicaciones" class="btn-ghost-light">Predicaciones</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VISÍTANOS -->
+  <section class="bg-paper py-28 sm:py-36">
+    <div class="shell text-center">
+      <p class="eyebrow text-stone" data-reveal>{settings.address} · Sabadell</p>
+      <h2 class="display mx-auto mt-6 max-w-6xl text-[clamp(3rem,10vw,9.5rem)]" data-reveal>
+        Ven tal <span class="serif-accent flame-text pr-2">como</span> eres
+      </h2>
+      <div class="mt-12 flex flex-wrap justify-center gap-3" data-reveal>
+        <a href="/visitanos" class="btn-dark">Planifica tu visita <Icon name="arrow-right" /></a>
+        <a href={settings.mapsUrl} target="_blank" rel="noreferrer" class="btn-ghost-dark"><Icon name="map-pin" /> Cómo llegar</a>
+      </div>
+    </div>
+  </section>
+
+  <VideoModal />
+</Base>

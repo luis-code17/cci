@@ -1,0 +1,42 @@
+---
+import Icon from './Icon.astro'
+---
+
+<dialog id="video-modal" class="m-auto w-[min(1100px,calc(100vw-2rem))] max-w-none bg-transparent p-0 text-white backdrop:bg-ink/90 backdrop:backdrop-blur-sm">
+  <div class="flex items-center justify-between gap-4 pb-4">
+    <p data-video-modal-title class="line-clamp-1 text-lg font-semibold"></p>
+    <button type="button" data-video-modal-close class="inline-flex h-10 shrink-0 items-center gap-2 rounded-full border border-white/30 px-4 text-[11px] font-semibold uppercase tracking-[0.18em] hover:bg-white/10">
+      Cerrar <Icon name="x" class="h-4 w-4" />
+    </button>
+  </div>
+  <div class="aspect-video overflow-hidden rounded-2xl bg-black">
+    <iframe data-video-modal-frame title="Reproductor de YouTube" class="h-full w-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+  </div>
+  <div class="flex justify-end pt-4">
+    <a data-video-modal-link target="_blank" rel="noreferrer" class="link-arrow text-white/80 hover:text-white">Ver en YouTube <Icon name="arrow-up-right" /></a>
+  </div>
+</dialog>
+
+<script>
+  const modal = document.getElementById('video-modal') as HTMLDialogElement
+  const frame = modal.querySelector<HTMLIFrameElement>('[data-video-modal-frame]')!
+  const title = modal.querySelector<HTMLElement>('[data-video-modal-title]')!
+  const link = modal.querySelector<HTMLAnchorElement>('[data-video-modal-link]')!
+
+  // Delegación: también funciona con tarjetas añadidas después (biblioteca de predicaciones).
+  document.addEventListener('click', (event) => {
+    const trigger = (event.target as HTMLElement).closest<HTMLElement>('[data-play-video]')
+    if (!trigger) return
+    const id = trigger.dataset.playVideo!
+    title.textContent = trigger.dataset.videoTitle ?? ''
+    frame.src = `https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1&autoplay=1`
+    link.href = `https://www.youtube.com/watch?v=${id}`
+    modal.showModal()
+  })
+  const close = () => modal.close()
+  modal.querySelector('[data-video-modal-close]')!.addEventListener('click', close)
+  modal.addEventListener('click', (event) => {
+    if (event.target === modal) close()
+  })
+  modal.addEventListener('close', () => (frame.src = 'about:blank'))
+</script>

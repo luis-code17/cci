@@ -1,0 +1,41 @@
+---
+import Base from '@/layouts/Base.astro'
+import Icon from '@/components/Icon.astro'
+import PageHero from '@/components/PageHero.astro'
+import EventCard from '@/components/EventCard.astro'
+import ServiceCards from '@/components/ServiceCards.astro'
+import SectionHeading from '@/components/SectionHeading.astro'
+import { getSettings, getUpcomingEvents } from '@/lib/cms'
+
+const [events, settings] = await Promise.all([getUpcomingEvents(30), getSettings()])
+Astro.response.headers.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=600')
+---
+
+<Base title="Eventos" description="Agenda de eventos y reuniones de CCI Sabadell.">
+  <PageHero eyebrow="Agenda" title="Eventos" accent="y encuentros" subtitle="Conferencias, celebraciones y momentos para vivir la fe en comunidad." />
+
+  <section class="bg-paper py-24 sm:py-32">
+    <div class="shell">
+      {
+        events.length > 0 ? (
+          <div class="grid gap-x-8 gap-y-16 md:grid-cols-2 xl:grid-cols-3">
+            {events.map((event) => <EventCard event={event} />)}
+          </div>
+        ) : (
+          <div class="rounded-[2rem] border border-dashed border-line px-6 py-20 text-center" data-reveal>
+            <Icon name="calendar" class="mx-auto h-8 w-8 text-stone" />
+            <p class="display mt-6 text-4xl">Pronto, nuevas fechas</p>
+            <p class="mx-auto mt-4 max-w-md text-stone">Estamos preparando los próximos eventos. Mientras tanto, te esperamos en nuestras reuniones semanales.</p>
+          </div>
+        )
+      }
+    </div>
+  </section>
+
+  <section class="border-t border-line bg-paper py-24 sm:py-32">
+    <div class="shell">
+      <SectionHeading eyebrow="Cada semana" title="Reuniones" class="mb-12" />
+      <ServiceCards services={settings.services} />
+    </div>
+  </section>
+</Base>

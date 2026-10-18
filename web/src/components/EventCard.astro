@@ -1,0 +1,25 @@
+---
+import Icon from './Icon.astro'
+import { mediaSrc, type Event } from '@/lib/cms'
+import { dateParts, formatTime } from '@/lib/format'
+
+interface Props {
+  event: Event
+}
+const { event } = Astro.props
+const date = dateParts(event.startsAt)
+---
+
+<a href={`/eventos/${event.slug}`} class="group block" data-reveal>
+  <div class="card-img relative aspect-[4/3] rounded-3xl">
+    <img src={mediaSrc(event.image, 'card') ?? '/img/conocenos.jpeg'} alt="" loading="lazy" />
+    <div class="absolute left-5 top-5 flex flex-col items-center rounded-2xl bg-white px-4 py-3 text-ink">
+      <span class="display text-3xl">{date.day}</span>
+      <span class="eyebrow mt-1 text-[10px]">{date.month}</span>
+    </div>
+  </div>
+  <p class="eyebrow mt-6 text-stone">{date.weekday} · {formatTime(event.startsAt)}</p>
+  <h3 class="mt-2 text-2xl font-bold leading-tight tracking-tight">{event.title}</h3>
+  {event.summary && <p class="mt-3 line-clamp-2 text-[15px] leading-6 text-stone">{event.summary}</p>}
+  <span class="link-arrow mt-5">Más información <Icon name="arrow-right" /></span>
+</a>

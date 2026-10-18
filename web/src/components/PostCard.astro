@@ -1,0 +1,23 @@
+---
+import Icon from './Icon.astro'
+import { mediaSrc, type Post } from '@/lib/cms'
+import { formatDate } from '@/lib/format'
+
+interface Props {
+  post: Post
+  size?: 'lg' | 'md'
+}
+const { post, size = 'md' } = Astro.props
+---
+
+<a href={`/blog/${post.slug}`} class:list={['group grid gap-6', size === 'lg' && 'lg:grid-cols-2 lg:items-center lg:gap-12']} data-reveal>
+  <div class:list={['card-img rounded-3xl', size === 'lg' ? 'aspect-[16/11]' : 'aspect-[4/3]']}>
+    <img src={mediaSrc(post.cover, 'card') ?? '/img/conocenos.jpeg'} alt="" loading="lazy" />
+  </div>
+  <div>
+    <p class="eyebrow text-stone">{formatDate(post.publishedAt)}{post.author ? ` · ${post.author}` : ''}</p>
+    <h3 class:list={['mt-3 font-bold leading-[1.05] tracking-tight', size === 'lg' ? 'text-4xl sm:text-5xl' : 'text-2xl']}>{post.title}</h3>
+    {post.excerpt && <p class="mt-4 line-clamp-3 text-[15px] leading-7 text-stone">{post.excerpt}</p>}
+    <span class="link-arrow mt-6">Leer <Icon name="arrow-right" /></span>
+  </div>
+</a>

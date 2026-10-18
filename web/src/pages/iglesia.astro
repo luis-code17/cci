@@ -1,0 +1,130 @@
+---
+import Base from '@/layouts/Base.astro'
+import Icon from '@/components/Icon.astro'
+import PageHero from '@/components/PageHero.astro'
+import SectionHeading from '@/components/SectionHeading.astro'
+import { getAbout, getMinistries, getSettings, mediaSrc } from '@/lib/cms'
+
+const [about, ministries, settings] = await Promise.all([getAbout(), getMinistries(), getSettings()])
+Astro.response.headers.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=600')
+---
+
+<Base title="Iglesia" description={about.intro}>
+  <PageHero eyebrow="Sobre nosotros" title={about.title} subtitle={about.intro} image={mediaSrc(about.image, 'hero') ?? '/img/conocenos.jpeg'} imageAlt={about.image?.alt} size="lg" />
+
+  <!-- MISIÓN -->
+  <section class="bg-paper py-28 sm:py-36">
+    <div class="shell grid gap-12 lg:grid-cols-12">
+      <p class="eyebrow text-stone lg:col-span-3" data-reveal>Nuestra misión</p>
+      <p class="text-[clamp(1.9rem,4.2vw,3.75rem)] font-medium leading-[1.08] tracking-[-0.03em] lg:col-span-9" data-reveal>{about.mission}</p>
+    </div>
+  </section>
+
+  <!-- VALORES -->
+  <section class="bg-paper pb-28 sm:pb-36">
+    <div class="shell">
+      <SectionHeading eyebrow="Lo que nos mueve" title="Valores" class="mb-14" />
+      <div class="grid border-t border-ink md:grid-cols-2 lg:grid-cols-4">
+        {
+          about.values.map((value, index) => (
+            <article class="border-b border-line py-10 md:pr-10 lg:border-b-0 lg:border-r lg:px-8 lg:first:pl-0 lg:last:border-r-0" data-reveal style={`transition-delay:${index * 80}ms`}>
+              <span class="font-serif text-5xl italic flame-text">{String(index + 1).padStart(2, '0')}</span>
+              <h3 class="mt-6 text-2xl font-bold tracking-tight">{value.title}</h3>
+              {value.description && <p class="mt-3 text-[15px] leading-7 text-stone">{value.description}</p>}
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- CREEMOS -->
+  <section id="creemos" class="scroll-mt-20 bg-ink py-28 text-white sm:py-36">
+    <div class="shell grid gap-16 lg:grid-cols-12">
+      <div class="lg:col-span-5">
+        <div class="lg:sticky lg:top-32">
+          <SectionHeading eyebrow="Fe" title="Lo que" accent="creemos" tone="light" intro="Una fe sencilla y bíblica, centrada en la persona y la obra de Jesucristo." />
+        </div>
+      </div>
+      <div class="divide-y divide-white/10 border-y border-white/10 lg:col-span-7">
+        {
+          about.beliefs.map((belief) => (
+            <article class="grid gap-4 py-10 sm:grid-cols-[10rem_1fr]" data-reveal>
+              <h3 class="display text-3xl">{belief.title}</h3>
+              <div>
+                {belief.description && <p class="text-lg leading-8 text-white/75">{belief.description}</p>}
+                {belief.reference && <p class="eyebrow mt-4 flame-text">{belief.reference}</p>}
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- PASTORES -->
+  <section class="bg-paper py-28 sm:py-36">
+    <div class="shell">
+      <SectionHeading eyebrow="Liderazgo" title="Nuestros" accent="pastores" class="mb-14" />
+      <div class="grid gap-8 md:grid-cols-2">
+        {
+          about.leaders.map((leader, index) => (
+            <article class="group" data-reveal style={`transition-delay:${index * 100}ms`}>
+              <div class="card-img aspect-[4/5] rounded-[2rem]">
+                <img src={mediaSrc(leader.photo, 'card') ?? '/img/pastor.jpg'} alt={leader.name} loading="lazy" class="object-top" />
+              </div>
+              <h3 class="display mt-7 text-4xl">{leader.name}</h3>
+              {leader.role && <p class="mt-2 font-serif text-2xl italic text-stone">{leader.role}</p>}
+              {leader.bio && <p class="mt-4 max-w-lg text-[15px] leading-7 text-ink/75">{leader.bio}</p>}
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- MINISTERIOS -->
+  <section id="ministerios" class="scroll-mt-20 border-t border-line bg-paper py-28 sm:py-36">
+    <div class="shell">
+      <SectionHeading eyebrow="Encuentra tu lugar" title="Ministerios" intro="Hay un espacio para cada etapa de la vida. Ven, conoce a la familia y crece junto a otros." class="mb-16" />
+      <div class="space-y-6">
+        {
+          ministries.map((ministry, index) => (
+            <article class="group grid overflow-hidden rounded-[2rem] bg-white md:grid-cols-2" data-reveal>
+              <div class:list={['card-img aspect-[16/11] md:aspect-auto md:min-h-[26rem]', index % 2 === 1 && 'md:order-2']}>
+                <img src={mediaSrc(ministry.image, 'card') ?? '/img/conocenos.jpeg'} alt="" loading="lazy" />
+              </div>
+              <div class="flex flex-col justify-center p-8 sm:p-12 lg:p-16">
+                {ministry.audience && <p class="eyebrow text-stone">{ministry.audience}</p>}
+                <h3 class="display mt-4 text-[clamp(2.4rem,4.5vw,4rem)]">{ministry.name}</h3>
+                {ministry.tagline && <p class="mt-2 font-serif text-3xl italic">{ministry.tagline}</p>}
+                {ministry.description && <p class="mt-6 max-w-md text-[15px] leading-7 text-stone">{ministry.description}</p>}
+                <div class="mt-8 flex flex-wrap items-center gap-4">
+                  {ministry.meetingTime && (
+                    <span class="inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 text-sm font-medium">
+                      <Icon name="clock" /> {ministry.meetingTime}
+                    </span>
+                  )}
+                  <a href={`/contacto?asunto=${encodeURIComponent(ministry.name)}`} class="link-arrow">
+                    Quiero participar <Icon name="arrow-right" />
+                  </a>
+                </div>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="flame-bg py-24 text-white sm:py-32">
+    <div class="shell flex flex-col items-start justify-between gap-10 lg:flex-row lg:items-end">
+      <h2 class="display max-w-4xl text-[clamp(2.6rem,7vw,6.5rem)]">¡Esta es tu <span class="serif-accent">casa!</span></h2>
+      <div class="flex flex-wrap gap-3">
+        <a href="/visitanos" class="btn-dark">Planifica tu visita <Icon name="arrow-right" /></a>
+        <a href={`mailto:${settings.email}`} class="btn-ghost-light">Escríbenos</a>
+      </div>
+    </div>
+  </section>
+</Base>

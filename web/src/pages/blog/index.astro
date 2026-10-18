@@ -1,0 +1,33 @@
+---
+import Base from '@/layouts/Base.astro'
+import PageHero from '@/components/PageHero.astro'
+import PostCard from '@/components/PostCard.astro'
+import { getPosts } from '@/lib/cms'
+
+const posts = await getPosts()
+const [first, ...rest] = posts
+Astro.response.headers.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=600')
+---
+
+<Base title="Blog" description="Reflexiones, noticias y vida de la comunidad de CCI Sabadell.">
+  <PageHero eyebrow="Blog" title="Historias" accent="y reflexiones" subtitle="Noticias, enseñanzas y lo que Dios está haciendo en nuestra comunidad." />
+
+  <section class="bg-paper py-24 sm:py-32">
+    <div class="shell">
+      {
+        first ? (
+          <>
+            <PostCard post={first} size="lg" />
+            {rest.length > 0 && (
+              <div class="mt-24 grid gap-x-8 gap-y-16 border-t border-line pt-16 md:grid-cols-2 xl:grid-cols-3">
+                {rest.map((post) => <PostCard post={post} />)}
+              </div>
+            )}
+          </>
+        ) : (
+          <p class="rounded-[2rem] border border-dashed border-line px-6 py-20 text-center text-stone">Todavía no hay publicaciones. ¡Vuelve pronto!</p>
+        )
+      }
+    </div>
+  </section>
+</Base>

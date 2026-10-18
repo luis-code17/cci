@@ -1,0 +1,217 @@
+---
+import Base from '@/layouts/Base.astro'
+import Icon from '@/components/Icon.astro'
+import PageHero from '@/components/PageHero.astro'
+import SectionHeading from '@/components/SectionHeading.astro'
+import { getSettings, giving } from '@/lib/cms'
+import { env } from '@/lib/env'
+import { getPaymentConfig } from '@/lib/payments/config'
+
+const settings = await getSettings()
+const cardEnabled = getPaymentConfig() !== null
+const amounts = [10, 25, 50, 100]
+
+function isValidIban(value: string) {
+  if (!/^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/.test(value)) return false
+  const digits = [...`${value.slice(4)}${value.slice(0, 4)}`].map((char) => (/[A-Z]/.test(char) ? String(char.charCodeAt(0) - 55) : char)).join('')
+  return [...digits].reduce((remainder, digit) => (remainder * 10 + Number(digit)) % 97, 0) === 1
+}
+const iban = env('BANK_TRANSFER_IBAN')?.replace(/\s+/g, '').toUpperCase() ?? ''
+const holder = env('BANK_TRANSFER_ACCOUNT_HOLDER')
+const bic = env('BANK_TRANSFER_BIC')?.toUpperCase()
+const transfer = holder && isValidIban(iban) ? { holder, iban: iban.match(/.{1,4}/g)!.join(' '), bic } : null
+
+const status = Astro.url.searchParams.get('Ds_SignatureVersion') ? 'returned' : null
+
+const reasons = [
+  { title: 'Misión compartida', text: 'Tu apoyo nos ayuda a servir a las familias, acompañar a los jóvenes y fortalecer la comunidad.' },
+  { title: 'Transparencia', text: 'Usamos cada ofrenda de forma responsable y con integridad al servicio de la iglesia.' },
+  { title: 'Crecimiento', text: 'Tu generosidad contribuye al crecimiento espiritual y a la vida de nuestra comunidad de fe.' },
+]
+---
+
+<Base title="Ofrendas y diezmos" description={giving.subtitle}>
+  <PageHero eyebrow="Ofrendas y diezmos" title={giving.title} subtitle={giving.subtitle} image="/img/versiculo_del_dia.jpeg" />
+
+  <section id="donar" class="scroll-mt-20 bg-paper py-24 sm:py-32">
+    <div class="shell grid gap-8 lg:grid-cols-12">
+      <div class="rounded-[2rem] bg-white p-6 sm:p-10 lg:col-span-7" data-reveal>
+        <p class="eyebrow text-stone">Tu aportación</p>
+        <h2 class="display mt-4 text-5xl sm:text-6xl">Dar con <span class="serif-accent">alegría</span></h2>
+
+        {status && <p class="mt-6 rounded-2xl bg-paper px-5 py-4 text-sm">Has vuelto desde la pasarela de pago. Si la operación se completó, recibirás la confirmación de tu banco. ¡Gracias!</p>}
+
+        {
+          cardEnabled ? (
+            <form data-donation-form class="mt-10">
+              <fieldset>
+                <legend class="text-sm font-semibold">Elige un importe</legend>
+                <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {amounts.map((amount) => (
+                    <label class="cursor-pointer">
+                      <input type="radio" name="preset" value={amount} class="peer sr-only" />
+                      <span class="flex h-20 items-center justify-center rounded-2xl border border-line text-2xl font-bold transition peer-checked:border-ink peer-checked:bg-ink peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-flame-2 hover:border-ink">
+                        {amount} €
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+              <label class="mt-6 grid gap-2 text-sm font-semibold">
+                Otra cantidad
+                <span class="relative">
+                  <input name="custom" inputmode="decimal" autocomplete="off" placeholder="Por ejemplo, 30" class="field pr-12 text-lg" />
+                  <span class="absolute right-5 top-1/2 -translate-y-1/2 font-semibold text-stone">€</span>
+                </span>
+              </label>
+              <p data-donation-error role="alert" class="mt-4 hidden rounded-2xl bg-flame-3/10 px-4 py-3 text-sm font-medium text-flame-3"></p>
+              <button type="submit" class="btn-flame mt-8 w-full min-h-14 text-sm" disabled>
+                <Icon name="card" /> <span data-donation-label>Elige un importe</span>
+              </button>
+              <p class="mt-4 text-center text-xs text-stone">Pago seguro con tarjeta procesado por Redsys. El importe se cargará una sola vez.</p>
+            </form>
+          ) : (
+            <p class="mt-8 rounded-2xl bg-paper px-5 py-4 text-[15px] leading-7 text-stone">
+              El pago con tarjeta no está disponible en este momento. Puedes colaborar por transferencia o escribirnos a{' '}
+              <a href={`mailto:${settings.email}`} class="font-semibold text-ink underline">{settings.email}</a>.
+            </p>
+          )
+        }
+      </div>
+
+      <figure class="relative isolate flex flex-col justify-end overflow-hidden rounded-[2rem] bg-ink p-8 text-white sm:p-12 lg:col-span-5" data-reveal>
+        <div class="flame-bg absolute -right-24 -top-24 -z-10 h-80 w-80 rounded-full opacity-40 blur-[90px]"></div>
+        <img src="/flame.png" alt="" class="mb-auto h-14 w-auto self-start" />
+        <blockquote class="mt-16 font-serif text-3xl leading-tight sm:text-4xl">“{giving.verse}”</blockquote>
+        <figcaption class="eyebrow mt-8 flame-text">{giving.reference}</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="bg-paper pb-24 sm:pb-32">
+    <div class="shell">
+      <SectionHeading eyebrow="Formas de colaborar" title="Elige" accent="cómo" class="mb-12" />
+      <div class="grid gap-5 md:grid-cols-3">
+        <article class="rounded-3xl border border-line bg-white p-8" data-reveal>
+          <Icon name="card" class="h-7 w-7" />
+          <h3 class="mt-8 text-2xl font-bold">Tarjeta bancaria</h3>
+          <p class="mt-3 text-[15px] leading-6 text-stone">Aportación única desde esta web mediante la pasarela Redsys.</p>
+          <p class="eyebrow mt-6">{cardEnabled ? '● Disponible' : 'Próximamente'}</p>
+        </article>
+        <article class="rounded-3xl border border-line bg-white p-8" data-reveal>
+          <Icon name="bank" class="h-7 w-7" />
+          <h3 class="mt-8 text-2xl font-bold">Transferencia</h3>
+          {
+            transfer ? (
+              <dl class="mt-4 space-y-3 text-sm">
+                <div><dt class="text-stone">Titular</dt><dd class="font-semibold">{transfer.holder}</dd></div>
+                <div><dt class="text-stone">IBAN</dt><dd class="break-all font-mono font-semibold">{transfer.iban}</dd></div>
+                {transfer.bic && <div><dt class="text-stone">BIC</dt><dd class="font-mono font-semibold">{transfer.bic}</dd></div>}
+                <div><dt class="text-stone">Concepto</dt><dd class="font-semibold">Donación CCI Sabadell</dd></div>
+              </dl>
+            ) : (
+              <>
+                <p class="mt-3 text-[15px] leading-6 text-stone">Pronto publicaremos los datos oficiales de la cuenta de la iglesia.</p>
+                <p class="eyebrow mt-6">Próximamente</p>
+              </>
+            )
+          }
+        </article>
+        <article class="rounded-3xl border border-line bg-white p-8" data-reveal>
+          <Icon name="phone" class="h-7 w-7" />
+          <h3 class="mt-8 text-2xl font-bold">Bizum</h3>
+          <p class="mt-3 text-[15px] leading-6 text-stone">La opción de Bizum todavía no está habilitada.</p>
+          <p class="eyebrow mt-6">Próximamente</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-ink py-24 text-white sm:py-32">
+    <div class="shell grid gap-12 lg:grid-cols-12">
+      <div class="lg:col-span-5">
+        <SectionHeading eyebrow="Por qué damos" title="Tu apoyo" accent="importa" tone="light" />
+      </div>
+      <div class="grid gap-10 sm:grid-cols-3 lg:col-span-7">
+        {
+          reasons.map((reason) => (
+            <div data-reveal>
+              <Icon name="heart" class="h-6 w-6 text-flame-2" />
+              <h3 class="mt-6 text-xl font-bold">{reason.title}</h3>
+              <p class="mt-3 text-[15px] leading-6 text-white/65">{reason.text}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+</Base>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-donation-form]')
+  if (form) {
+    const button = form.querySelector<HTMLButtonElement>('button[type=submit]')!
+    const label = form.querySelector<HTMLElement>('[data-donation-label]')!
+    const error = form.querySelector<HTMLElement>('[data-donation-error]')!
+    const custom = form.querySelector<HTMLInputElement>('input[name=custom]')!
+    const currency = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' })
+
+    const amount = () => {
+      const preset = form.querySelector<HTMLInputElement>('input[name=preset]:checked')
+      const value = Number((preset?.value ?? custom.value).trim().replace(',', '.'))
+      return Number.isFinite(value) && value >= 1 ? Math.round(value * 100) / 100 : null
+    }
+    const update = () => {
+      const value = amount()
+      button.disabled = value === null
+      label.textContent = value ? `Donar ${currency.format(value)}` : 'Elige un importe'
+    }
+    form.querySelectorAll<HTMLInputElement>('input[name=preset]').forEach((input) =>
+      input.addEventListener('change', () => {
+        custom.value = ''
+        update()
+      }),
+    )
+    custom.addEventListener('input', () => {
+      form.querySelectorAll<HTMLInputElement>('input[name=preset]').forEach((input) => (input.checked = false))
+      update()
+    })
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault()
+      const value = amount()
+      if (!value) return
+      button.disabled = true
+      label.textContent = 'Preparando pago…'
+      error.classList.add('hidden')
+      try {
+        const response = await fetch('/api/payments/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount: Math.round(value * 100), returnUrl: `${location.origin}/ofrendas` }),
+        })
+        const payload = await response.json()
+        if (!payload.ok) throw new Error(payload.error)
+        // Redsys requiere un POST de formulario a su pasarela.
+        const redirect = document.createElement('form')
+        redirect.method = 'POST'
+        redirect.action = payload.data.form.action
+        redirect.hidden = true
+        for (const [name, val] of Object.entries<string>(payload.data.form.params)) {
+          const input = document.createElement('input')
+          input.type = 'hidden'
+          input.name = name
+          input.value = val
+          redirect.append(input)
+        }
+        document.body.append(redirect)
+        label.textContent = 'Redirigiendo…'
+        redirect.submit()
+      } catch (err) {
+        error.textContent = err instanceof Error && err.message ? err.message : 'No se pudo iniciar el pago.'
+        error.classList.remove('hidden')
+        update()
+      }
+    })
+  }
+</script>

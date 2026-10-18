@@ -1,0 +1,21 @@
+---
+interface Props {
+  eyebrow?: string
+  title: string
+  accent?: string
+  intro?: string
+  tone?: 'dark' | 'light'
+  class?: string
+}
+const { eyebrow, title, accent, intro, tone = 'dark', class: className } = Astro.props
+const muted = tone === 'light' ? 'text-white/60' : 'text-stone'
+---
+
+<div class:list={['max-w-4xl', className]} data-reveal>
+  {eyebrow && <p class:list={['eyebrow mb-5', muted]}>{eyebrow}</p>}
+  <h2 class="display text-[clamp(2.4rem,6.5vw,5.5rem)]">
+    {title}
+    {accent && <span class="serif-accent text-[0.8em]"> {accent}</span>}
+  </h2>
+  {intro && <p class:list={['mt-6 max-w-2xl text-lg leading-8', muted]}>{intro}</p>}
+</div>

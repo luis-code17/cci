@@ -1,0 +1,185 @@
+{
+  "settings": {
+    "churchName": "CCI Sabadell",
+    "fullName": "Centro Cristiano Internacional",
+    "tagline": "Tu casa, somos uno",
+    "description": "CCI Sabadell es una comunidad cristiana en Sabadell: un lugar de nuevos comienzos centrado en Jesucristo, la enseñanza bíblica y la vida en comunidad.",
+    "address": "Carrer de Brutau, 100",
+    "city": "08203 Sabadell, Barcelona",
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Carrer+de+Brutau+100+08203+Sabadell",
+    "mapLat": 41.5376,
+    "mapLng": 2.11564,
+    "email": "sabadellcci@gmail.com",
+    "phone": "",
+    "instagram": "https://www.instagram.com/cci_sabadell/",
+    "facebook": "https://www.facebook.com/ccisbdnc/?locale=es_ES",
+    "youtube": "https://www.youtube.com/@CentroCristianoInternacionalSa",
+    "services": [
+      {
+        "day": "Domingo",
+        "time": "",
+        "name": "Culto principal",
+        "description": "Nuestra reunión principal: adoración, Palabra y comunidad para toda la familia."
+      },
+      {
+        "day": "Miércoles",
+        "time": "19:45",
+        "name": "Adoración y oración",
+        "description": "Una noche para buscar a Dios juntos en oración y alabanza."
+      },
+      {
+        "day": "Viernes",
+        "time": "",
+        "name": "Encuentro de jóvenes",
+        "description": "Fe, amistad y propósito para la nueva generación."
+      }
+    ],
+    "announcement": {
+      "enabled": true,
+      "text": "Miércoles 19:45 · Servicio de adoración y oración",
+      "href": "/visitanos"
+    }
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "Centro Cristiano Internacional · Sabadell",
+      "title": "Bienvenido a casa",
+      "subtitle": "Un lugar de nuevos comienzos. Somos uno en la fe, en la Palabra y en la vida en comunidad.",
+      "primary": {
+        "label": "Planifica tu visita",
+        "href": "/visitanos"
+      },
+      "secondary": {
+        "label": "Ver predicaciones",
+        "href": "/predicaciones"
+      }
+    },
+    "statement": "Somos una iglesia que existe para acercar a las personas a Dios, fortalecer la vida espiritual y compartir esperanza a través de Jesucristo.",
+    "culture": {
+      "title": "¡Esta es tu casa!",
+      "body": "Somos Uno: una comunidad cristiana sencilla, cercana y centrada en Jesucristo. Vengas como vengas, aquí encontrarás fe, acompañamiento y un lugar donde crecer junto a otros."
+    },
+    "nextSteps": [
+      {
+        "title": "Soy nuevo",
+        "description": "¿Es tu primera vez? Te contamos qué esperar y cómo llegar.",
+        "label": "Planifica tu visita",
+        "href": "/visitanos"
+      },
+      {
+        "title": "Necesito oración",
+        "description": "Cuéntanos tu necesidad. Nuestro equipo orará contigo.",
+        "label": "Pedir oración",
+        "href": "/contacto?tipo=oracion"
+      },
+      {
+        "title": "Quiero conectar",
+        "description": "Encuentra tu lugar en uno de nuestros ministerios.",
+        "label": "Ver ministerios",
+        "href": "/iglesia#ministerios"
+      }
+    ],
+    "online": {
+      "title": "Siéntete parte desde donde estés",
+      "body": "Si hoy no puedes acompañarnos en persona, mira nuestras predicaciones y reuniones en YouTube y forma parte de la familia CCI."
+    }
+  },
+  "about": {
+    "title": "Somos CCI Sabadell",
+    "intro": "Una iglesia sencilla, cercana y centrada en Jesucristo. Queremos que cada persona encuentre fe, acompañamiento y un lugar donde crecer.",
+    "mission": "Acercar a las personas a Dios, fortalecer la vida espiritual y compartir esperanza a través de Jesucristo.",
+    "values": [
+      {
+        "title": "Jesucristo en el centro",
+        "description": "Todo lo que hacemos nace de Él y apunta a Él."
+      },
+      {
+        "title": "La Palabra",
+        "description": "Enseñanza bíblica clara y práctica para la vida diaria."
+      },
+      {
+        "title": "Somos uno",
+        "description": "Una familia diversa que camina unida, en Sabadell y en el mundo."
+      },
+      {
+        "title": "Nuevos comienzos",
+        "description": "Creemos en un Dios que restaura y da segundas oportunidades."
+      }
+    ],
+    "beliefs": [
+      {
+        "title": "Dios",
+        "description": "Creemos en un solo Dios, eternamente existente en tres personas: Padre, Hijo y Espíritu Santo.",
+        "reference": "Mateo 28:19"
+      },
+      {
+        "title": "Jesucristo",
+        "description": "Jesús es el Hijo de Dios, murió por nuestros pecados y resucitó para darnos vida eterna.",
+        "reference": "Juan 3:16"
+      },
+      {
+        "title": "La Biblia",
+        "description": "La Biblia es la Palabra de Dios, nuestra guía para la fe y la vida.",
+        "reference": "2 Timoteo 3:16"
+      },
+      {
+        "title": "La iglesia",
+        "description": "La iglesia es la familia de Dios, llamada a amar, servir y compartir el evangelio.",
+        "reference": "Hechos 2:42"
+      }
+    ],
+    "leaders": [
+      {
+        "name": "Pastor",
+        "role": "Pastores de CCI Sabadell",
+        "bio": "",
+        "photo": "pastor.jpg"
+      },
+      {
+        "name": "Pastora",
+        "role": "Pastores de CCI Sabadell",
+        "bio": "",
+        "photo": "pastora.jpg"
+      }
+    ]
+  },
+  "ministries": [
+    {
+      "name": "Adoración y oración",
+      "audience": "Para toda la iglesia",
+      "tagline": "Buscar a Dios, juntos",
+      "description": "Cada miércoles nos reunimos para orar, adorar y presentar nuestras vidas delante de Dios.",
+      "meetingTime": "Miércoles · 19:45",
+      "image": "anuncio_miercoles.jpg"
+    },
+    {
+      "name": "Jóvenes",
+      "audience": "Nueva generación",
+      "tagline": "Fe con propósito",
+      "description": "Un espacio para crecer en la fe, hacer amigos y descubrir el propósito de Dios para tu vida.",
+      "meetingTime": "Viernes",
+      "image": "predicaciones_dark.jpeg"
+    },
+    {
+      "name": "Familias",
+      "audience": "Padres, madres e hijos",
+      "tagline": "Una casa para todos",
+      "description": "Acompañamos a las familias para que la fe se viva en casa, en la iglesia y en la ciudad.",
+      "meetingTime": "Domingo",
+      "image": "conocenos.jpeg"
+    }
+  ],
+  "posts": [
+    {
+      "title": "Bienvenidos a la nueva web de CCI Sabadell",
+      "excerpt": "Estrenamos una casa digital para que estés al día de nuestras reuniones, predicaciones y eventos.",
+      "body": "Estrenamos una casa digital para que estés al día de nuestras reuniones, predicaciones y eventos. Aquí encontrarás los mensajes de cada semana, el versículo del día y toda la información para visitarnos. ¡Te esperamos!"
+    }
+  ],
+  "giving": {
+    "title": "Generosidad",
+    "subtitle": "Tu generosidad ayuda a apoyar la misión, la comunidad y las actividades de la iglesia.",
+    "verse": "Cada uno dé como propuso en su corazón, no con tristeza ni por obligación, porque Dios ama al dador alegre.",
+    "reference": "2 Corintios 9:7"
+  }
+}

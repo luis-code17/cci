@@ -1,0 +1,186 @@
+---
+import Base from '@/layouts/Base.astro'
+import Icon from '@/components/Icon.astro'
+import PageHero from '@/components/PageHero.astro'
+import VideoCard from '@/components/VideoCard.astro'
+import VideoModal from '@/components/VideoModal.astro'
+import { getYouTubeCatalog, YOUTUBE_CHANNEL_HANDLE_URL } from '@/lib/youtube'
+
+const catalog = await getYouTubeCatalog()
+const sermons = catalog.videos.filter((video) => !video.isShort)
+const shorts = catalog.videos.filter((video) => video.isShort)
+const latest = sermons[0]
+const playlists = [...catalog.playlists]
+  .filter((playlist) => playlist.videoCount > 0)
+  .sort((a, b) => b.videoCount - a.videoCount || a.title.localeCompare(b.title, 'es'))
+
+// Solo lo que necesita el cliente para filtrar y pintar tarjetas.
+const libraryData = {
+  videos: catalog.videos.map(({ id, title, thumbnail, publishedAt, durationLabel, playlistIds, isShort, tags, searchText }) => ({
+    id,
+    title,
+    thumbnail,
+    publishedAt,
+    durationLabel,
+    playlistIds,
+    isShort,
+    search: `${title} ${tags.join(' ')} ${searchText ?? ''}`.toLocaleLowerCase('es').slice(0, 600),
+  })),
+  playlists: playlists.map(({ id, title }) => ({ id, title })),
+}
+
+Astro.response.headers.set('Cache-Control', 'public, max-age=300, stale-while-revalidate=3600')
+---
+
+<Base title="Predicaciones" description="Mensajes y predicaciones de CCI Sabadell: busca por tema, serie o fecha y míralos aquí o en YouTube.">
+  <PageHero eyebrow="Predicaciones" title="Mensajes" accent="que transforman" subtitle="Explora las predicaciones de CCI Sabadell, encuentra un tema concreto y míralas aquí o en nuestro canal de YouTube." image="/img/predicaciones_dark.jpeg">
+    <div class="mt-10 flex flex-wrap gap-3" data-reveal>
+      <a href="#biblioteca" class="btn-light">Explorar mensajes <Icon name="arrow-down" /></a>
+      {
+        shorts.length > 0 && (
+          <button type="button" data-shorts-open class="btn-ghost-light">
+            <Icon name="play" class="h-3.5 w-3.5" /> Shorts <span class="rounded-full bg-white/15 px-2 py-0.5 text-[10px]">{shorts.length}</span>
+          </button>
+        )
+      }
+    </div>
+  </PageHero>
+
+  {
+    !catalog.apiEnabled && (
+      <section class="bg-paper py-24">
+        <div class="shell">
+          <div class="rounded-3xl border border-line bg-white p-10 text-center sm:p-16">
+            <p class="display text-4xl sm:text-5xl">Míranos en YouTube</p>
+            <p class="mx-auto mt-4 max-w-xl text-stone">Ahora mismo no podemos cargar el catálogo de vídeos. Puedes ver todas las predicaciones directamente en nuestro canal.</p>
+            <a href={YOUTUBE_CHANNEL_HANDLE_URL} target="_blank" rel="noreferrer" class="btn-flame mt-8">
+              <Icon name="youtube" /> Abrir canal
+            </a>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    latest && (
+      <section class="bg-ink pb-24 pt-6 text-white">
+        <div class="shell grid items-end gap-10 lg:grid-cols-12">
+          <div class="lg:col-span-8" data-reveal>
+            <VideoCard video={latest} size="lg" />
+          </div>
+          <div class="lg:col-span-4" data-reveal>
+            <p class="eyebrow text-white/50">Último mensaje</p>
+            <p class="mt-4 text-lg leading-8 text-white/70">Cada semana compartimos la predicación del culto. Dale al play o suscríbete al canal para no perderte ninguna.</p>
+            <a href={YOUTUBE_CHANNEL_HANDLE_URL} target="_blank" rel="noreferrer" class="link-arrow mt-8 text-white">
+              Suscríbete en YouTube <Icon name="arrow-up-right" />
+            </a>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    catalog.apiEnabled && (
+      <section id="biblioteca" class="scroll-mt-24 bg-paper py-24 sm:py-32">
+        <div class="shell">
+          <div class="flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
+            <div data-reveal>
+              <p class="eyebrow text-stone">Biblioteca</p>
+              <h2 class="display mt-5 text-[clamp(2.4rem,6vw,5rem)]">Todos los mensajes</h2>
+            </div>
+            <label class="relative block w-full lg:max-w-md" data-reveal>
+              <span class="sr-only">Buscar predicaciones</span>
+              <Icon name="search" class="pointer-events-none absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone" />
+              <input data-library-search type="search" placeholder="Buscar por tema, título o predicador" class="field rounded-full pl-12" />
+            </label>
+          </div>
+
+          <div class="mt-10 flex flex-col gap-4 border-y border-line py-5 lg:flex-row lg:items-center lg:justify-between">
+            <div class="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 sm:mx-0 sm:flex-wrap sm:px-0" role="group" aria-label="Series" data-library-playlists>
+              <button type="button" data-playlist="" aria-pressed="true" class="chip">Todos <span>{sermons.length}</span></button>
+              {
+                playlists.map((playlist) => (
+                  <button type="button" data-playlist={playlist.id} aria-pressed="false" class="chip">
+                    {playlist.title} <span>{playlist.videoCount}</span>
+                  </button>
+                ))
+              }
+            </div>
+            <label class="flex shrink-0 items-center gap-3 text-sm text-stone">
+              Ordenar
+              <select data-library-sort class="rounded-full border border-line bg-white px-4 py-2 text-sm font-medium text-ink">
+                <option value="recent">Más recientes</option>
+                <option value="oldest">Más antiguos</option>
+                <option value="title">Título A–Z</option>
+              </select>
+            </label>
+          </div>
+
+          <p data-library-count class="mt-8 text-sm text-stone" aria-live="polite"></p>
+          <div data-library-grid class="mt-6 grid gap-x-6 gap-y-12 sm:grid-cols-2 xl:grid-cols-3"></div>
+          <div data-library-empty hidden class="mt-6 rounded-3xl border border-dashed border-line px-6 py-16 text-center">
+            <p class="text-xl font-semibold">No encontramos mensajes con esa búsqueda.</p>
+            <button type="button" data-library-reset class="btn-ghost-dark mt-6">Limpiar filtros</button>
+          </div>
+          <nav data-library-pagination aria-label="Paginación" class="mt-16 flex items-center justify-center gap-2"></nav>
+        </div>
+      </section>
+    )
+  }
+
+  <!-- Visor de Shorts -->
+  <div data-shorts hidden class="fixed inset-0 z-[80] bg-black text-white" role="dialog" aria-modal="true" aria-label="Shorts">
+    <div class="fixed left-4 top-4 z-10 flex items-center gap-2">
+      <span data-shorts-progress class="rounded-full bg-white/10 px-3 py-2 text-xs font-medium backdrop-blur"></span>
+      <button type="button" data-shorts-close class="inline-flex h-9 items-center gap-1.5 rounded-full bg-white/10 px-3 text-xs font-semibold backdrop-blur hover:bg-white/20">
+        <Icon name="x" class="h-3.5 w-3.5" /> Salir
+      </button>
+    </div>
+    <div data-shorts-scroller class="h-[100dvh] snap-y snap-mandatory overflow-y-auto overscroll-contain"></div>
+  </div>
+
+  <script type="application/json" id="library-data" set:html={JSON.stringify(libraryData).replace(/</g, '\\u003c')} />
+  <VideoModal />
+</Base>
+
+<style>
+  .chip {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 9999px;
+    border: 1px solid var(--color-line);
+    background: white;
+    padding: 0.55rem 1rem;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: all 0.25s;
+  }
+  .chip span {
+    font-size: 11px;
+    color: var(--color-stone);
+  }
+  .chip:hover {
+    border-color: var(--color-ink);
+  }
+  .chip[aria-pressed='true'] {
+    background: var(--color-ink);
+    border-color: var(--color-ink);
+    color: white;
+  }
+  .chip[aria-pressed='true'] span {
+    color: rgb(255 255 255 / 0.6);
+  }
+</style>
+
+<script>
+  import { initLibrary, initShorts } from '@/scripts/predicaciones'
+
+  const data = JSON.parse(document.getElementById('library-data')!.textContent!)
+  initLibrary(data)
+  initShorts(data.videos.filter((video: { isShort?: boolean }) => video.isShort))
+</script>

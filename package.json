@@ -1,0 +1,16 @@
+{
+  "name": "cci",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm --parallel --filter cms --filter web dev",
+    "dev:cms": "pnpm --filter cms dev",
+    "dev:web": "pnpm --filter web dev",
+    "build": "pnpm --filter cms build && pnpm --filter web build",
+    "seed": "pnpm --filter cms seed"
+  },
+  "engines": {
+    "node": ">=20.18.1"
+  },
+  "packageManager": "pnpm@10.10.0"
+}

@@ -1,0 +1,151 @@
+---
+import Icon from './Icon.astro'
+import Logo from './Logo.astro'
+import type { Settings } from '@/lib/cms'
+
+interface Props {
+  settings: Settings
+}
+
+const { settings } = Astro.props
+const path = Astro.url.pathname
+
+const links = [
+  { href: '/iglesia', label: 'Iglesia' },
+  { href: '/predicaciones', label: 'Predicaciones' },
+  { href: '/eventos', label: 'Eventos' },
+  { href: '/visitanos', label: 'Visítanos' },
+  { href: '/blog', label: 'Blog' },
+]
+const isActive = (href: string) => path === href || path.startsWith(`${href}/`)
+const announcement = settings.announcement?.enabled && settings.announcement.text ? settings.announcement : null
+const socials = [
+  { href: settings.instagram, label: 'Instagram', icon: 'instagram' },
+  { href: settings.facebook, label: 'Facebook', icon: 'facebook' },
+  { href: settings.youtube, label: 'YouTube', icon: 'youtube' },
+] as const
+---
+
+<header id="site-header" class="group/header fixed inset-x-0 top-0 z-50" data-scrolled="false">
+  {
+    announcement && (
+      <a
+        href={announcement.href ?? '/visitanos'}
+        class="flame-bg block text-center text-[11px] font-semibold uppercase tracking-[0.22em] text-white transition-[max-height,opacity] duration-500 group-data-[scrolled=true]/header:max-h-0 group-data-[scrolled=true]/header:opacity-0 max-h-12 overflow-hidden"
+      >
+        <span class="shell flex min-h-9 items-center justify-center gap-2 py-2">
+          {announcement.text}
+          <Icon name="arrow-right" class="h-3.5 w-3.5" />
+        </span>
+      </a>
+    )
+  }
+  <div class="border-b border-transparent transition-colors duration-500 group-data-[scrolled=true]/header:border-white/10 group-data-[scrolled=true]/header:bg-ink/85 group-data-[scrolled=true]/header:backdrop-blur-xl">
+    <div class="shell flex h-18 items-center justify-between gap-6 sm:h-20">
+      <a href="/" aria-label="CCI Sabadell, inicio" class="shrink-0">
+        <Logo />
+      </a>
+
+      <nav aria-label="Principal" class="hidden lg:block">
+        <ul class="flex items-center gap-1">
+          {
+            links.map((link) => (
+              <li>
+                <a
+                  href={link.href}
+                  aria-current={isActive(link.href) ? 'page' : undefined}
+                  class="relative px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.18em] text-white/75 transition hover:text-white aria-[current=page]:text-white after:absolute after:inset-x-4 after:-bottom-0.5 after:h-px after:origin-left after:scale-x-0 after:bg-white after:transition-transform after:duration-300 hover:after:scale-x-100 aria-[current=page]:after:scale-x-100"
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <div class="flex items-center gap-2">
+        <a href="/ofrendas" class="btn-light hidden min-h-10 px-5 text-[11px] sm:inline-flex">Ofrendas</a>
+        <button
+          type="button"
+          data-menu-open
+          aria-controls="site-menu"
+          aria-expanded="false"
+          class="inline-flex h-10 items-center gap-2 rounded-full border border-white/30 px-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-white/10 lg:hidden"
+        >
+          Menú <Icon name="menu" class="h-4 w-4" />
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Menú a pantalla completa (móvil) -->
+<div
+  id="site-menu"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Menú"
+  class="pointer-events-none fixed inset-0 z-[60] flex flex-col bg-ink text-white opacity-0 transition-opacity duration-500 data-[open=true]:pointer-events-auto data-[open=true]:opacity-100"
+  data-open="false"
+>
+  <div class="shell flex h-18 items-center justify-between sm:h-20">
+    <a href="/" aria-label="CCI Sabadell, inicio"><Logo /></a>
+    <button type="button" data-menu-close class="inline-flex h-10 items-center gap-2 rounded-full border border-white/30 px-4 text-[11px] font-semibold uppercase tracking-[0.18em]">
+      Cerrar <Icon name="x" class="h-4 w-4" />
+    </button>
+  </div>
+  <nav aria-label="Menú móvil" class="shell flex flex-1 flex-col justify-center">
+    <ul class="space-y-1">
+      {
+        [{ href: '/', label: 'Inicio' }, ...links, { href: '/ofrendas', label: 'Ofrendas' }, { href: '/contacto', label: 'Contacto' }].map((link, index) => (
+          <li>
+            <a
+              href={link.href}
+              aria-current={(link.href === '/' ? path === '/' : isActive(link.href)) ? 'page' : undefined}
+              class="display group flex items-baseline gap-4 py-1 text-[clamp(2.4rem,11vw,4.5rem)] text-white/90 transition hover:text-white aria-[current=page]:flame-text"
+            >
+              <span class="font-sans text-xs font-medium tracking-[0.2em] text-white/40">{String(index + 1).padStart(2, '0')}</span>
+              {link.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+  <div class="shell flex flex-wrap items-center justify-between gap-4 border-t border-white/10 py-6 text-sm text-white/60">
+    <span>{settings.address} · {settings.city}</span>
+    <div class="flex gap-3">
+      {
+        socials.filter((item) => item.href).map((item) => (
+          <a href={item.href!} target="_blank" rel="noreferrer" aria-label={item.label} class="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 hover:bg-white/10">
+            <Icon name={item.icon} class="h-4 w-4" />
+          </a>
+        ))
+      }
+    </div>
+  </div>
+</div>
+
+<script>
+  const header = document.getElementById('site-header')!
+  const menu = document.getElementById('site-menu')!
+  const openButton = document.querySelector<HTMLButtonElement>('[data-menu-open]')!
+
+  const onScroll = () => header.setAttribute('data-scrolled', String(window.scrollY > 40))
+  onScroll()
+  window.addEventListener('scroll', onScroll, { passive: true })
+
+  const setMenu = (open: boolean) => {
+    menu.dataset.open = String(open)
+    openButton.setAttribute('aria-expanded', String(open))
+    document.documentElement.style.overflow = open ? 'hidden' : ''
+    if (open) menu.querySelector<HTMLElement>('[data-menu-close]')?.focus()
+    else openButton.focus()
+  }
+  openButton.addEventListener('click', () => setMenu(true))
+  menu.querySelector('[data-menu-close]')!.addEventListener('click', () => setMenu(false))
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && menu.dataset.open === 'true') setMenu(false)
+  })
+</script>

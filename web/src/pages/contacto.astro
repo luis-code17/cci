@@ -1,0 +1,51 @@
+---
+import Base from '@/layouts/Base.astro'
+import Icon from '@/components/Icon.astro'
+import PageHero from '@/components/PageHero.astro'
+import ContactForm from '@/components/ContactForm.astro'
+import { getSettings } from '@/lib/cms'
+
+const settings = await getSettings()
+const tipo = Astro.url.searchParams.get('tipo')
+const kind = tipo === 'oracion' || tipo === 'visita' ? tipo : 'contacto'
+const subject = Astro.url.searchParams.get('asunto')?.slice(0, 120) ?? (kind === 'oracion' ? 'Petición de oración' : '')
+const isPrayer = kind === 'oracion'
+---
+
+<Base title={isPrayer ? 'Petición de oración' : 'Contacto'} description="Escríbenos o déjanos tu petición de oración.">
+  <PageHero
+    eyebrow={isPrayer ? 'Oración' : 'Contacto'}
+    title={isPrayer ? 'Oramos' : 'Hablemos'}
+    accent={isPrayer ? 'contigo' : undefined}
+    subtitle={isPrayer
+      ? 'Cuéntanos por qué quieres que oremos. Tu petición la recibe nuestro equipo pastoral y se trata con total confidencialidad.'
+      : 'Si quieres visitarnos, pedir información o hablar con el ministerio, déjanos tu mensaje.'}
+  />
+
+  <section class="bg-paper py-24 sm:py-32">
+    <div class="shell grid gap-16 lg:grid-cols-12">
+      <aside class="space-y-10 lg:col-span-4">
+        <div data-reveal>
+          <p class="eyebrow text-stone">Email</p>
+          <a href={`mailto:${settings.email}`} class="mt-3 flex items-center gap-3 text-xl font-semibold hover:underline">
+            <Icon name="mail" class="h-5 w-5" />{settings.email}
+          </a>
+        </div>
+        <div data-reveal>
+          <p class="eyebrow text-stone">Dirección</p>
+          <a href={settings.mapsUrl} target="_blank" rel="noreferrer" class="mt-3 flex gap-3 text-xl font-semibold hover:underline">
+            <Icon name="map-pin" class="mt-1 h-5 w-5 shrink-0" />
+            <span>{settings.address}<br /><span class="font-normal text-stone">{settings.city}</span></span>
+          </a>
+        </div>
+        <blockquote class="border-l-2 border-flame-2 pl-6" data-reveal>
+          <p class="font-serif text-2xl italic leading-snug">“Echad toda vuestra ansiedad sobre él, porque él tiene cuidado de vosotros.”</p>
+          <cite class="eyebrow mt-4 block not-italic text-stone">1 Pedro 5:7</cite>
+        </blockquote>
+      </aside>
+      <div class="rounded-[2rem] bg-white p-6 sm:p-10 lg:col-span-8" data-reveal>
+        <ContactForm kind={kind} subject={subject} />
+      </div>
+    </div>
+  </section>
+</Base>

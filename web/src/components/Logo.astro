@@ -1,0 +1,31 @@
+---
+interface Props {
+  /** `mark`: llama + texto (cabecera). `full`: logo completo con lema. */
+  variant?: 'mark' | 'full'
+  /** Color del texto: `light` para fondos oscuros, `dark` para fondos claros. */
+  tone?: 'light' | 'dark'
+  class?: string
+}
+const { variant = 'mark', tone = 'light', class: className = '' } = Astro.props
+---
+
+{
+  variant === 'full' ? (
+    <img
+      src={tone === 'light' ? '/logo-white.png' : '/logo-color.png'}
+      alt="CCI Sabadell — Tu casa, somos uno"
+      width="813"
+      height="575"
+      class:list={['h-auto object-contain', className]}
+    />
+  ) : (
+    <span class:list={['inline-flex items-center gap-2.5', tone === 'light' ? 'text-white' : 'text-ink', className]}>
+      <img src="/flame.png" alt="" width="254" height="363" class="h-8 w-auto" />
+      <span class="flex flex-col leading-none">
+        <span class="text-[22px] font-extrabold tracking-[-0.04em]">CCI</span>
+        <span class="text-[9px] font-semibold uppercase tracking-[0.42em]">Sabadell</span>
+      </span>
+      <span class="sr-only">CCI Sabadell</span>
+    </span>
+  )
+}

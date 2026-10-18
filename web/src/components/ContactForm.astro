@@ -1,0 +1,92 @@
+---
+import Icon from './Icon.astro'
+
+interface Props {
+  kind?: 'contacto' | 'oracion' | 'visita'
+  subject?: string
+  /** Oculta el selector de tipo (p. ej. en Visítanos). */
+  fixedKind?: boolean
+}
+const { kind = 'contacto', subject = '', fixedKind = false } = Astro.props
+const kinds = [
+  { value: 'contacto', label: 'Contacto general' },
+  { value: 'oracion', label: 'Petición de oración' },
+  { value: 'visita', label: 'Voy a visitaros' },
+]
+---
+
+<form data-contact-form class="grid gap-4" novalidate>
+  {
+    fixedKind ? (
+      <input type="hidden" name="kind" value={kind} />
+    ) : (
+      <fieldset class="flex flex-wrap gap-2">
+        <legend class="sr-only">Motivo</legend>
+        {kinds.map((item) => (
+          <label class="cursor-pointer">
+            <input type="radio" name="kind" value={item.value} checked={item.value === kind} class="peer sr-only" />
+            <span class="inline-flex rounded-full border border-line bg-white px-4 py-2 text-sm font-semibold transition peer-checked:border-ink peer-checked:bg-ink peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-flame-2">
+              {item.label}
+            </span>
+          </label>
+        ))}
+      </fieldset>
+    )
+  }
+  <div class="grid gap-4 sm:grid-cols-2">
+    <label class="grid gap-2 text-sm font-medium">
+      Nombre
+      <input name="name" required minlength="2" maxlength="80" autocomplete="name" class="field" />
+    </label>
+    <label class="grid gap-2 text-sm font-medium">
+      Email
+      <input name="email" type="email" required autocomplete="email" class="field" />
+    </label>
+  </div>
+  <label class="grid gap-2 text-sm font-medium">
+    Asunto
+    <input name="subject" required minlength="3" maxlength="120" value={subject} class="field" />
+  </label>
+  <label class="grid gap-2 text-sm font-medium">
+    Mensaje
+    <textarea name="message" required minlength="10" maxlength="2000" rows="6" class="field resize-y"></textarea>
+  </label>
+  <!-- Campo trampa para bots -->
+  <input name="website" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true" />
+  <div class="flex flex-wrap items-center gap-4 pt-2">
+    <button type="submit" class="btn-dark">Enviar mensaje <Icon name="arrow-right" /></button>
+    <p data-contact-status role="status" class="text-sm text-stone"></p>
+  </div>
+</form>
+
+<script>
+  document.querySelectorAll<HTMLFormElement>('[data-contact-form]').forEach((form) => {
+    const status = form.querySelector<HTMLElement>('[data-contact-status]')!
+    const button = form.querySelector<HTMLButtonElement>('button[type=submit]')!
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault()
+      if (!form.reportValidity()) return
+      button.disabled = true
+      status.textContent = 'Enviando…'
+      status.className = 'text-sm text-stone'
+      try {
+        const response = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(Object.fromEntries(new FormData(form))),
+        })
+        const result = await response.json()
+        if (!result.ok) throw new Error(result.error)
+        form.reset()
+        status.textContent = '¡Gracias! Hemos recibido tu mensaje y te responderemos pronto.'
+        status.className = 'text-sm font-semibold text-ink'
+      } catch (error) {
+        status.textContent = error instanceof Error && error.message ? error.message : 'No se pudo enviar. Inténtalo de nuevo.'
+        status.className = 'text-sm font-semibold text-flame-3'
+      } finally {
+        button.disabled = false
+      }
+    })
+  })
+</script>

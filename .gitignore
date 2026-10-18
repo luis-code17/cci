@@ -1,0 +1,45 @@
+# Dependencias
+node_modules/
+.pnpm-store/
+
+# Builds y cachés
+dist/
+.next/
+.astro/
+out/
+build/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+
+# Variables de entorno (secretos). Solo se suben los ejemplos.
+.env
+.env.*
+!.env.example
+
+# Datos locales del CMS: base de datos SQLite y archivos subidos
+cms/media/
+cms/*.db
+cms/*.db-*
+*.sqlite
+*.sqlite-journal
+
+# Archivos que Next.js genera automáticamente para agentes de IA
+cms/AGENTS.md
+cms/CLAUDE.md
+
+# Tests
+test-results/
+playwright-report/
+blob-report/
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Sistema / editores
+.DS_Store
+Thumbs.db
+*:Zone.Identifier
+.idea/
