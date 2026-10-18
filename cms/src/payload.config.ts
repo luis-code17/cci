@@ -40,6 +40,13 @@ const allowedOrigins = [...new Set([serverURL, webURL])]
  */
 function database() {
   const url = process.env.DATABASE_URL || 'file:./cci.db'
+  if (process.env.VERCEL && !/^postgres(ql)?:\/\//.test(url)) {
+    // En Vercel no se puede escribir en disco: sin Postgres el CMS no puede arrancar.
+    throw new Error(
+      `[cms] DATABASE_URL no es una URL de Postgres (valor actual: ${process.env.DATABASE_URL ? 'otro motor' : 'vacía'}). ` +
+        'Conecta Neon en Vercel → Storage y vuelve a desplegar.',
+    )
+  }
   if (/^postgres(ql)?:\/\//.test(url)) {
     return postgresAdapter({
       pool: { connectionString: url },
@@ -52,6 +59,10 @@ function database() {
     migrationDir: path.resolve(dirname, 'migrations'),
     prodMigrations: sqliteMigrations,
   })
+}
+
+if (process.env.VERCEL && !process.env.PAYLOAD_SECRET) {
+  throw new Error('[cms] Falta PAYLOAD_SECRET en las variables de entorno de Vercel.')
 }
 
 export default buildConfig({
